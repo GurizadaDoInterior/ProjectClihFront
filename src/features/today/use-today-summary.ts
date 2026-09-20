@@ -7,7 +7,7 @@ const todayKey = ['today'] as const;
 
 export function useTodaySummary() {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: todayKey, queryFn: getTodaySummary });
+  const query = useQuery({ queryKey: todayKey, queryFn: getTodaySummary, refetchInterval: 60_000 });
   const toggleMutation = useMutation({
     mutationFn: completeHabit,
     onMutate: async (habitId) => {
@@ -19,9 +19,7 @@ export function useTodaySummary() {
         return {
           ...current,
           activities: current.activities.map((activity) =>
-            activity.id === habitId
-              ? { ...activity, completed: !activity.completed }
-              : activity,
+            activity.id === habitId ? { ...activity, completed: true } : activity,
           ),
         };
       });
@@ -31,11 +29,19 @@ export function useTodaySummary() {
     onError: (_error, _habitId, context) => {
       if (context?.previous) queryClient.setQueryData(todayKey, context.previous);
     },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: todayKey }),
   });
 
   return {
     ...query,
-    toggleActivity: toggleMutation.mutate,
+    toggleActivity: (id: string) => {
+      if (
+        !toggleMutation.isPending &&
+        !query.data?.activities.find((item) => item.id === id)?.completed
+      )
+        toggleMutation.mutate(id);
+    },
+    completionError: toggleMutation.error,
     isToggling: toggleMutation.isPending,
   };
 }

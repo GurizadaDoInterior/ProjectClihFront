@@ -4,14 +4,17 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppScreen } from '@/src/components/app-screen';
 import { SectionHeader } from '@/src/components/section-header';
 import { colors, radius } from '@/src/theme/tokens';
-
-const periods = [
-  { title: 'Manhã', time: '07:00 – 11:30', items: ['Caminhar · 3 km', 'Revisar prioridades · 10 min'] },
-  { title: 'Tarde', time: '13:00 – 18:00', items: ['Estudar programação · 30 min'] },
-  { title: 'Noite', time: '19:00 – 23:00', items: ['Ler · 10 páginas', 'Desacelerar · 20 min'] },
-];
+import { useTodaySummary } from '@/src/features/today/use-today-summary';
+import { ActivityRow } from '@/src/components/activity-row';
 
 export default function RoutineScreen() {
+  const { data, error, refetch, toggleActivity, completionError } = useTodaySummary();
+  const groups = [
+    ['MORNING', 'Manhã'],
+    ['AFTERNOON', 'Tarde'],
+    ['EVENING', 'Noite'],
+    ['ANYTIME', 'Sem horário'],
+  ];
   return (
     <AppScreen>
       <View style={styles.header}>
@@ -26,18 +29,29 @@ export default function RoutineScreen() {
         </Link>
       </View>
 
-      {periods.map((period) => (
-        <View key={period.title} style={styles.period}>
-          <SectionHeader action={<Text style={styles.time}>{period.time}</Text>}>
-            {period.title}
-          </SectionHeader>
-          {period.items.map((item) => (
-            <View key={item} style={styles.item}>
-              <View style={styles.itemMarker} />
-              <Text style={styles.itemText}>{item}</Text>
-              <Text style={styles.drag}>⠿</Text>
-            </View>
-          ))}
+      {!data ? (
+        <Pressable onPress={() => refetch()}>
+          <Text>
+            {error ? `${error.message} Toque para tentar novamente.` : 'Carregando rotina...'}
+          </Text>
+        </Pressable>
+      ) : null}
+      {completionError ? (
+        <Text accessibilityRole="alert" style={{ color: colors.danger }}>
+          {completionError.message}
+        </Text>
+      ) : null}
+      {data && !data.activities.length ? (
+        <Text style={styles.subtitle}>Nenhuma atividade para hoje. Use + para criar uma.</Text>
+      ) : null}
+      {groups.map(([key, title]) => (
+        <View key={key} style={styles.period}>
+          <SectionHeader>{title}</SectionHeader>
+          {data?.activities
+            .filter((item) => (item.period ?? 'ANYTIME') === key)
+            .map((item) => (
+              <ActivityRow key={item.id} activity={item} onToggle={() => toggleActivity(item.id)} />
+            ))}
         </View>
       ))}
     </AppScreen>
@@ -76,7 +90,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surface,
   },
-  itemMarker: { width: 8, height: 8, marginRight: 12, borderRadius: 4, backgroundColor: colors.teal },
+  itemMarker: {
+    width: 8,
+    height: 8,
+    marginRight: 12,
+    borderRadius: 4,
+    backgroundColor: colors.teal,
+  },
   itemText: { flex: 1, color: colors.ink, fontSize: 15, fontWeight: '600' },
   drag: { color: '#9CA9BC', fontSize: 22 },
 });

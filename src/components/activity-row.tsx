@@ -23,7 +23,8 @@ export function ActivityRow({
   return (
     <Pressable
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: activity.completed }}
+      accessibilityState={{ checked: activity.completed, disabled: activity.completed }}
+      disabled={activity.completed}
       accessibilityLabel={`${activity.title}, ${activity.target}`}
       onPress={onToggle}
       style={({ pressed }) => [
@@ -34,7 +35,7 @@ export function ActivityRow({
       <View style={[styles.icon, { backgroundColor: appearance.background }]}>
         <SymbolView
           name={{ ios: appearance.symbol as never, android: appearance.symbol as never, web: appearance.symbol as never }}
-          tintColor={appearance.color}
+          tintColor={activity.areaColor ?? appearance.color}
           size={25}
         />
       </View>
@@ -42,7 +43,7 @@ export function ActivityRow({
         <Text style={[styles.title, activity.completed && styles.completedTitle]}>
           {activity.title}
         </Text>
-        <Text style={styles.target}>{activity.target}</Text>
+        <Text style={styles.target}>{activity.areaName ? `${activity.areaName} · ` : ''}{activity.target}</Text>
       </View>
       <View style={[styles.toggle, activity.completed && styles.checked]}>
         {activity.completed ? <Text style={styles.check}>✓</Text> : null}

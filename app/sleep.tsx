@@ -32,7 +32,7 @@ export default function SleepScreen() {
 
   return (
     <AppScreen>
-      <Text style={styles.intro}>Um registro simples ajuda a entender como o sono influencia o seu dia.</Text>
+      <Text style={styles.intro}>Este registro fica somente neste aparelho e ainda não é sincronizado com sua conta.</Text>
       <View style={styles.timeRow}>
         <Controller
           control={control}

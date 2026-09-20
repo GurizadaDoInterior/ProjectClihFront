@@ -7,8 +7,10 @@ Base do produto de rotina e evolução pessoal da Gurizada do Interior. O mesmo 
 - Navegação principal: Hoje, Rotina, Evolução, Conquistas e Perfil.
 - Resumo do dia com nível, sequência, semana, progresso e equilíbrio por área.
 - Conclusão otimista de atividades com feedback tátil.
-- Fila local idempotente quando a API está indisponível.
-- Registro de sono e criação de atividade com validação.
+- Conclusão confirmada pelo servidor, com repetição idempotente em falhas temporárias e erro visível quando não é possível salvar.
+- Criação de áreas e hábitos com quantidade, unidade, período e dias da semana.
+- Rotina do dia, semana, progresso por área e perfil conectados à API atual.
+- Registro de sono local com validação (a API ainda não oferece sincronização de sono).
 - Dados de demonstração quando `EXPO_PUBLIC_API_URL` não está configurada.
 - Referência visual e quatro direções de ícone em `docs/design`.
 
@@ -28,6 +30,7 @@ No terminal do Expo, use `a` para Android, `w` para web ou leia o QR code com o 
 
 ```bash
 npm run typecheck
+npm test
 npm run build:web
 npm run check
 ```
@@ -45,6 +48,8 @@ docs/                 decisões e referências visuais
 ```
 
 ## Próximas decisões da equipe
+
+Para conectar o front ao backend local e conferir as limitações atuais, leia [Integração com a API](docs/backend-integration.md).
 
 1. Escolher nome final e uma das quatro direções de ícone.
 2. Escolher provedor OAuth/OpenID para Google, Apple e e-mail.

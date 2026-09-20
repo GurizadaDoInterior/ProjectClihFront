@@ -11,11 +11,13 @@ import { SectionHeader } from '@/src/components/section-header';
 import { WeekStrip } from '@/src/components/week-strip';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { colors, radius, shadows } from '@/src/theme/tokens';
+import { isDemo } from '@/src/services/api/client';
 
 export default function TodayScreen() {
-  const { data, isLoading, isError, refetch, toggleActivity } = useTodaySummary();
+  const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling } =
+    useTodaySummary();
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return (
       <AppScreen scroll={false}>
         <View style={styles.centered}>
@@ -26,12 +28,16 @@ export default function TodayScreen() {
     );
   }
 
-  if (isError) {
+  if (isError || !data) {
     return (
       <AppScreen scroll={false}>
         <View style={styles.centered}>
           <Text style={styles.title}>Não foi possível carregar sua rotina.</Text>
-          <Pressable accessibilityRole="button" onPress={() => refetch()} style={styles.retryButton}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => refetch()}
+            style={styles.retryButton}
+          >
             <Text style={styles.retryText}>Tentar novamente</Text>
           </Pressable>
         </View>
@@ -50,6 +56,7 @@ export default function TodayScreen() {
 
   return (
     <AppScreen testID="today-screen">
+      {isDemo ? <Text style={styles.sleepSubtitle}>Demonstração · dados de exemplo</Text> : null}
       <View style={styles.header}>
         <View style={styles.greetingBlock}>
           <Text style={styles.title}>Bom dia, {data.displayName}</Text>
@@ -71,7 +78,9 @@ export default function TodayScreen() {
           <View
             style={[
               styles.xpFill,
-              { width: `${Math.min((data.xp / data.xpToNextLevel) * 100, 100)}%` },
+              {
+                width: `${Math.min(((data.xpInLevel ?? data.xp) / Math.max(data.xpToNextLevel, 1)) * 100, 100)}%`,
+              },
             ]}
           />
         </View>
@@ -82,10 +91,31 @@ export default function TodayScreen() {
       <View style={styles.overview}>
         <ProgressRing completed={completed} total={data.activities.length} />
         <View style={styles.divider} />
-        <AreaRadar values={data.areaBalance} />
+        {data.areas ? (
+          <View style={{ flex: 1, paddingLeft: 16 }}>
+            {data.areas.map((area) => (
+              <Text key={area.id} style={styles.sleepSubtitle}>
+                {area.name}: {area.value}%
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <AreaRadar values={data.areaBalance} />
+        )}
       </View>
 
       <SectionHeader>Objetivos de hoje</SectionHeader>
+      {completionError ? (
+        <Text accessibilityRole="alert" style={{ color: colors.danger }}>
+          {completionError.message}
+        </Text>
+      ) : null}
+      {isToggling ? <Text style={styles.sleepSubtitle}>Salvando conclusão...</Text> : null}
+      {!data.activities.length ? (
+        <Link href="/habit/new" style={styles.sleepTitle}>
+          Crie sua primeira atividade
+        </Link>
+      ) : null}
       {data.activities.slice(0, 3).map((activity) => (
         <ActivityRow
           key={activity.id}
