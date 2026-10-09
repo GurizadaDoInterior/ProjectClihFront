@@ -181,3 +181,18 @@ test('204 responses and plain-text server errors are handled', async () => {
   global.fetch = async () => new Response('unavailable', { status: 503 });
   await assert.rejects(request('/today'), (error) => error.status === 503);
 });
+
+test('profile PATCH leaves an unset username unchanged and sends the selected timezone', async () => {
+  const { updateMe } = require('../src/services/api/today-api.ts');
+  global.fetch = async (url, init) => {
+    assert.equal(url, 'http://localhost:8080/api/v1/me');
+    assert.equal(init.method, 'PATCH');
+    const body = JSON.parse(init.body);
+    assert.equal(Object.hasOwn(body, 'username'), false);
+    assert.equal(body.timezoneId, 'America/Asuncion');
+    assert.equal(body.completeOnboarding, true);
+    return Response.json({ id: 'u', ...body, username: null });
+  };
+  const result = await updateMe({ displayName: 'Pessoa', username: undefined, timezoneId: 'America/Asuncion', completeOnboarding: true });
+  assert.equal(result.username, null);
+});

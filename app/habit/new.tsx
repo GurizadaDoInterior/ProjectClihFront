@@ -129,13 +129,17 @@ export default function NewHabitScreen() {
         <View style={styles.field}>
           <TextInput
             accessibilityLabel="Nome da nova área"
+            editable={!areas.isPending}
             placeholder="Nova área (ex.: Saúde)"
             maxLength={60}
             value={newArea}
             onChangeText={setNewArea}
             style={styles.input}
           />
-          <Pressable disabled={creatingArea || !newArea.trim()} onPress={addArea}>
+          <Pressable
+            disabled={areas.isPending || creatingArea || !newArea.trim()}
+            onPress={addArea}
+          >
             <Text style={styles.periodTextSelected}>
               {creatingArea ? 'Criando área...' : 'Adicionar área'}
             </Text>

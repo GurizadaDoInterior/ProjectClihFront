@@ -3,6 +3,7 @@ import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { useQuery } from '@tanstack/react-query';
 import { getMe } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
+import { Link } from 'expo-router';
 
 import { AppScreen } from '@/src/components/app-screen';
 import { colors, radius } from '@/src/theme/tokens';
@@ -29,7 +30,7 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{data.displayName}</Text>
         <Text style={styles.handle}>
           {profile.data
-            ? `@${profile.data.username} · ${profile.data.timezoneId}`
+            ? `${profile.data.username ? `@${profile.data.username} · ` : ''}${profile.data.timezoneId}`
             : isDemo
               ? 'Perfil de demonstração'
               : 'Seu perfil'}
@@ -47,6 +48,12 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </View>
+
+      {!isDemo ? (
+        <Link href="/profile/edit" style={styles.sectionTitle}>
+          Editar perfil e fuso horário
+        </Link>
+      ) : null}
 
       <View style={styles.stats}>
         <View style={styles.stat}>

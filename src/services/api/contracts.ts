@@ -19,7 +19,7 @@ export type Progress = {
 };
 export type User = {
   id: string;
-  username: string;
+  username: string | null;
   displayName: string;
   avatarUrl: string | null;
   timezoneId: string;
