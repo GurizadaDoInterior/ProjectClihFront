@@ -5,10 +5,14 @@ import { getMe } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
 import { Link } from 'expo-router';
 
+import { ThemeToggle } from '@/src/components/theme-toggle';
 import { AppScreen } from '@/src/components/app-screen';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 export default function ProfileScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { data, error, refetch } = useTodaySummary();
   const profile = useQuery({ queryKey: ['me'], queryFn: getMe, enabled: !isDemo });
   if (!data)
@@ -55,6 +59,7 @@ export default function ProfileScreen() {
         </Link>
       ) : null}
 
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}><Text style={styles.sectionTitle}>Aparência</Text><ThemeToggle /></View>
       <View style={styles.stats}>
         <View style={styles.stat}>
           <Text style={styles.statValue}>{data.streakDays}</Text>
@@ -97,7 +102,7 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   hero: { alignItems: 'center', paddingTop: 28, paddingBottom: 24 },
   avatar: {
     width: 88,
@@ -109,17 +114,17 @@ const styles = StyleSheet.create({
     borderColor: colors.surface,
     backgroundColor: colors.ink,
   },
-  avatarText: { color: colors.surface, fontSize: 36, fontWeight: '800' },
-  name: { color: colors.ink, fontSize: 26, fontWeight: '800', marginTop: 15 },
+  avatarText: { color: colors.onAccent, fontSize: 36, fontWeight: '700' },
+  name: { color: colors.ink, fontSize: 26, fontWeight: '700', marginTop: 15 },
   handle: { color: colors.muted, fontSize: 13, textAlign: 'center', marginTop: 4 },
   level: {
     marginTop: 13,
     paddingHorizontal: 13,
     paddingVertical: 7,
-    borderRadius: 14,
+    borderRadius: 8,
     backgroundColor: colors.blueSoft,
   },
-  levelText: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  levelText: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   stats: {
     flexDirection: 'row',
     padding: 8,
@@ -128,9 +133,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   stat: { flex: 1, alignItems: 'center', paddingVertical: 13 },
-  statValue: { color: colors.ink, fontSize: 21, fontWeight: '800' },
+  statValue: { color: colors.ink, fontSize: 21, fontWeight: '700' },
   statLabel: { color: colors.muted, fontSize: 11, fontWeight: '600', marginTop: 3 },
-  sectionTitle: { color: colors.ink, fontSize: 22, fontWeight: '800', marginBottom: 14 },
+  sectionTitle: { color: colors.ink, fontSize: 22, fontWeight: '700', marginBottom: 14 },
   feedRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,6 +161,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surfaceMuted,
   },
-  noteTitle: { color: colors.ink, fontSize: 15, fontWeight: '800' },
+  noteTitle: { color: colors.ink, fontSize: 15, fontWeight: '700' },
   noteText: { color: colors.muted, fontSize: 13, lineHeight: 19, marginTop: 6 },
 });

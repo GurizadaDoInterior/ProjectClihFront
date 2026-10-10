@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ThemeToggle } from '@/src/components/theme-toggle';
 import { ActivityRow } from '@/src/components/activity-row';
 import { AppScreen } from '@/src/components/app-screen';
 import { AreaRadar } from '@/src/components/area-radar';
@@ -10,10 +11,13 @@ import { ProgressRing } from '@/src/components/progress-ring';
 import { SectionHeader } from '@/src/components/section-header';
 import { WeekStrip } from '@/src/components/week-strip';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
-import { colors, radius, shadows } from '@/src/theme/tokens';
+import { radius, shadows } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import { isDemo } from '@/src/services/api/client';
 
 export default function TodayScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling } =
     useTodaySummary();
 
@@ -59,19 +63,27 @@ export default function TodayScreen() {
       {isDemo ? <Text style={styles.sleepSubtitle}>Demonstração · dados de exemplo</Text> : null}
       <View style={styles.header}>
         <View style={styles.greetingBlock}>
-          <Text style={styles.title}>Bom dia, {data.displayName}</Text>
-          <View style={styles.streakRow}>
-            <Text style={styles.flame}>♨</Text>
-            <Text style={styles.streakStrong}>{data.streakDays} dias</Text>
-            <Text style={styles.streak}> em sequência</Text>
-          </View>
+          <Text style={styles.title}>Olá, {data.displayName}</Text>
+<Text style={styles.kicker}>Sua rotina de hoje</Text>
         </View>
-        <BrandMark />
+        <ThemeToggle />
+      </View>
+
+      <View style={styles.streakHero}>
+        <Text style={styles.heroFlame}>🔥</Text>
+        <View style={styles.streakCopy}>
+          <Text style={styles.streakEyebrow}>SEQUÊNCIA</Text>
+          <Text style={styles.streakUnit}><Text style={styles.streakNumber}>{data.streakDays}</Text> dias em sequência</Text>
+        </View>
+        <View style={styles.streakRecord}>
+          <Text style={styles.heroFooterText}>Recorde</Text>
+          <Text style={styles.recordValue}>{data.longestStreak ?? data.streakDays} dias</Text>
+        </View>
       </View>
 
       <View style={styles.levelCard}>
         <View style={styles.levelRow}>
-          <Text style={styles.level}>Nível {data.level}</Text>
+          <Text style={[styles.level, { fontFamily: "ManropeMedium", fontWeight: "normal" }]}>Nível {data.level}</Text>
           <Text style={styles.xp}>{data.xp.toLocaleString('pt-BR')} XP</Text>
         </View>
         <View style={styles.xpTrack}>
@@ -104,13 +116,13 @@ export default function TodayScreen() {
         )}
       </View>
 
-      <SectionHeader>Objetivos de hoje</SectionHeader>
+      <View style={styles.objectivesHeader}><SectionHeader>Atividades de hoje</SectionHeader><Text style={styles.kicker}>{completed}/{data.activities.length} feitos</Text></View>
       {completionError ? (
         <Text accessibilityRole="alert" style={{ color: colors.danger }}>
           {completionError.message}
         </Text>
       ) : null}
-      {isToggling ? <Text style={styles.sleepSubtitle}>Salvando conclusão...</Text> : null}
+      {isToggling ? <Text style={styles.sleepSubtitle}>Salvando alteração...</Text> : null}
       {!data.activities.length ? (
         <Link href="/habit/new" style={styles.sleepTitle}>
           Crie sua primeira atividade
@@ -120,6 +132,7 @@ export default function TodayScreen() {
         <ActivityRow
           key={activity.id}
           activity={activity}
+          disabled={isToggling}
           onToggle={() => handleToggle(activity.id)}
         />
       ))}
@@ -137,7 +150,18 @@ export default function TodayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
+  kicker: { color: colors.muted, fontSize: 13, marginTop: 6 },
+  objectivesHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 8 },
+  streakHero: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 8, padding: 16, backgroundColor: colors.hero, marginBottom: 16 },
+  streakCopy: { flex: 1 },
+  streakEyebrow: { color: colors.heroMuted, fontSize: 10, fontWeight: '700', letterSpacing: 1.3, marginBottom: 3 },
+  heroFlame: { fontSize: 28 },
+  streakNumber: { color: '#FFFFFF', fontSize: 28, fontWeight: '700' },
+  streakUnit: { color: '#FFFFFF', fontSize: 14, lineHeight: 34, fontWeight: '600' },
+  streakRecord: { alignItems: 'flex-end' },
+  heroFooterText: { color: colors.heroMuted, fontSize: 10, fontWeight: '500' },
+  recordValue: { color: '#FFFFFF', fontSize: 13, fontWeight: '700', marginTop: 4 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -148,14 +172,14 @@ const styles = StyleSheet.create({
   greetingBlock: { flex: 1, paddingRight: 12 },
   title: {
     color: colors.ink,
-    fontSize: 29,
+    fontSize: 28,
     lineHeight: 35,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontWeight: '700',
+    letterSpacing: -0.8,
   },
   streakRow: { flexDirection: 'row', alignItems: 'center', marginTop: 7 },
   flame: { color: colors.orange, fontSize: 20, marginRight: 6 },
-  streakStrong: { color: colors.orange, fontSize: 16, fontWeight: '800' },
+  streakStrong: { color: colors.orange, fontSize: 16, fontWeight: '700' },
   streak: { color: colors.muted, fontSize: 16, fontWeight: '500' },
   levelCard: {
     padding: 14,
@@ -166,12 +190,17 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   levelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  level: { color: colors.ink, fontSize: 19, fontWeight: '800' },
+  level: { color: colors.ink, fontSize: 19, fontWeight: '700' },
   xp: { color: colors.muted, fontSize: 16, fontWeight: '700' },
   xpTrack: { height: 9, overflow: 'hidden', borderRadius: 5, backgroundColor: colors.border },
   xpFill: { height: '100%', borderRadius: 5, backgroundColor: colors.teal },
   overview: {
-    minHeight: 168,
+    minHeight: 188,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
@@ -184,10 +213,10 @@ const styles = StyleSheet.create({
     marginTop: 22,
     paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 14,
+    borderRadius: 8,
     backgroundColor: colors.primary,
   },
-  retryText: { color: colors.surface, fontWeight: '800' },
+  retryText: { color: colors.onAccent, fontWeight: '700' },
   sleepLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -197,7 +226,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.orangeSoft,
   },
-  sleepTitle: { color: colors.ink, fontSize: 16, fontWeight: '800' },
+  sleepTitle: { color: colors.ink, fontSize: 16, fontWeight: '700' },
   sleepSubtitle: { color: colors.muted, fontSize: 13, marginTop: 3 },
   chevron: { color: colors.orange, fontSize: 32, lineHeight: 32 },
   linkPressed: { opacity: 0.75 },

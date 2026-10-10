@@ -51,6 +51,7 @@ export type TodayResponse = {
     dayPeriod: DayPeriod;
     preferredTime: string | null;
     completed: boolean;
+    completionId?: string | null;
   }[];
 };
 export type CreateHabit = {

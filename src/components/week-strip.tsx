@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import type { WeekDay } from '@/src/types/today';
 
 export function WeekStrip({ days }: { days: WeekDay[] }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <View accessibilityLabel="Progresso da semana" style={styles.row}>
       {days.map((day) => (
@@ -28,7 +30,7 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -50,7 +52,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 35,
     height: 35,
-    borderRadius: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceMuted,
@@ -67,10 +69,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   check: {
-    color: colors.surface,
+    color: colors.onAccent,
     fontSize: 20,
     lineHeight: 22,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   innerDot: {
     width: 8,
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
   currentInner: {
     width: 19,
     height: 19,
-    borderRadius: 10,
+    borderRadius: 5,
     backgroundColor: colors.primary,
   },
 });

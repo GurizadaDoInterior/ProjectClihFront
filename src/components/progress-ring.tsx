@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { colors } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 const SIZE = 150;
 const STROKE = 14;
@@ -9,6 +9,8 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function ProgressRing({ completed, total }: { completed: number; total: number }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const progress = total === 0 ? 0 : completed / total;
   const percent = Math.round(progress * 100);
 
@@ -45,7 +47,7 @@ export function ProgressRing({ completed, total }: { completed: number; total: n
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   wrapper: {
     width: SIZE,
     height: SIZE,
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontSize: 37,
     lineHeight: 43,
-    fontWeight: '800',
+    fontWeight: '700',
     letterSpacing: -1.6,
   },
   caption: {

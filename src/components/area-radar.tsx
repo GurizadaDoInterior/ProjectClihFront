@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Line, Polygon } from 'react-native-svg';
 
-import { colors } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import type { AreaKey } from '@/src/types/today';
 
 const labels: Array<{ key: AreaKey; label: string }> = [
@@ -20,6 +20,8 @@ function point(index: number, value: number) {
 }
 
 export function AreaRadar({ values }: { values: Record<AreaKey, number> }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const valuePoints = labels.map(({ key }, index) => point(index, values[key])).join(' ');
   const outer = labels.map((_, index) => point(index, 1)).join(' ');
   const middle = labels.map((_, index) => point(index, 0.55)).join(' ');
@@ -46,7 +48,7 @@ export function AreaRadar({ values }: { values: Record<AreaKey, number> }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   wrapper: {
     width: 160,
     height: 174,

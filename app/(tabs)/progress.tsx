@@ -4,9 +4,12 @@ import { WeekStrip } from '@/src/components/week-strip';
 
 import { AppScreen } from '@/src/components/app-screen';
 import { SectionHeader } from '@/src/components/section-header';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 export default function ProgressScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { data, error, refetch } = useTodaySummary();
   if (!data)
     return (
@@ -65,19 +68,19 @@ export default function ProgressScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   title: {
     color: colors.ink,
     fontSize: 30,
     lineHeight: 36,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontWeight: '700',
+    letterSpacing: -0.3,
     paddingTop: 18,
   },
   subtitle: { color: colors.muted, fontSize: 15, marginTop: 5, marginBottom: 26 },
   summaryRow: { flexDirection: 'row', gap: 9, marginBottom: 30 },
   metric: { flex: 1, padding: 14, borderRadius: radius.md, backgroundColor: colors.surface },
-  metricValue: { color: colors.ink, fontSize: 22, fontWeight: '800' },
+  metricValue: { color: colors.ink, fontSize: 22, fontWeight: '700' },
   metricLabel: { color: colors.muted, fontSize: 11, fontWeight: '600', marginTop: 4 },
   calendar: {
     flexDirection: 'row',

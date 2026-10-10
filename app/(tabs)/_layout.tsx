@@ -1,7 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
 
-import { colors } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 const icons = {
   index: { ios: 'house.fill', android: 'home', web: 'home' },
@@ -12,13 +12,14 @@ const icons = {
 } as const;
 
 export default function TabLayout() {
+  const { colors } = useTheme();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '700', marginTop: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: 'ManropeBold', marginTop: 2 },
         tabBarStyle: {
           height: 76,
           paddingTop: 8,

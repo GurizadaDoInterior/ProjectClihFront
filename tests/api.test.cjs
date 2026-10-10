@@ -196,3 +196,27 @@ test('profile PATCH leaves an unset username unchanged and sends the selected ti
   const result = await updateMe({ displayName: 'Pessoa', username: undefined, timezoneId: 'America/Asuncion', completeOnboarding: true });
   assert.equal(result.username, null);
 });
+
+test('completed habits preserve the completion ID needed for cancellation', () => {
+  const response = { ...today, habits: [{ ...today.habits[0], completed: true, completionId: 'c1' }] };
+  assert.equal(mapToday(response).activities[0].completionId, 'c1');
+});
+test('undo calls the completion DELETE endpoint and accepts an empty response', async () => {
+  const { undoHabit } = require('../src/services/api/today-api.ts');
+  global.fetch = async (url, init) => {
+    assert.equal(url, 'http://localhost:8080/api/v1/habits/h/completions/c1');
+    assert.equal(init.method, 'DELETE');
+    return new Response(null, { status: 204 });
+  };
+  await undoHabit('h', 'c1');
+});
+test('undo without a completion ID fails without sending a request', async () => {
+  const { undoHabit } = require('../src/services/api/today-api.ts');
+  global.fetch = async () => assert.fail('must not call server');
+  await assert.rejects(undoHabit('h'), /identificar a conclusão/);
+});
+test('undo surfaces server failures so the UI can restore the previous state', async () => {
+  const { undoHabit } = require('../src/services/api/today-api.ts');
+  global.fetch = async () => Response.json({ message: 'Falha ao cancelar' }, { status: 500 });
+  await assert.rejects(undoHabit('h', 'c1'), /Falha ao cancelar/);
+});

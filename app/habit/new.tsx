@@ -10,7 +10,8 @@ import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
 import { AppScreen } from '@/src/components/app-screen';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 const habitSchema = z.object({
   name: z.string().trim().min(3, 'Digite ao menos 3 caracteres').max(80),
@@ -42,6 +43,8 @@ const weekDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATUR
 const dayLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 export default function NewHabitScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const queryClient = useQueryClient();
   const areas = useQuery({ queryKey: ['areas'], queryFn: getAreas });
@@ -247,10 +250,10 @@ export default function NewHabitScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   intro: { color: colors.muted, fontSize: 15, lineHeight: 22, paddingTop: 14, marginBottom: 26 },
   field: { marginBottom: 21 },
-  label: { color: colors.ink, fontSize: 14, fontWeight: '800', marginBottom: 9 },
+  label: { color: colors.ink, fontSize: 14, fontWeight: '700', marginBottom: 9 },
   input: {
     height: 56,
     paddingHorizontal: 16,
@@ -281,6 +284,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.primary,
   },
-  submitText: { color: colors.surface, fontSize: 15, fontWeight: '800' },
+  submitText: { color: colors.onAccent, fontSize: 15, fontWeight: '700' },
   pressed: { opacity: 0.82 },
 });

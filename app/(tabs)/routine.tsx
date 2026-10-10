@@ -3,12 +3,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/src/components/app-screen';
 import { SectionHeader } from '@/src/components/section-header';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { ActivityRow } from '@/src/components/activity-row';
 
 export default function RoutineScreen() {
-  const { data, error, refetch, toggleActivity, completionError } = useTodaySummary();
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  const { data, error, refetch, toggleActivity, completionError, isToggling } = useTodaySummary();
   const groups = [
     ['MORNING', 'Manhã'],
     ['AFTERNOON', 'Tarde'],
@@ -50,7 +53,7 @@ export default function RoutineScreen() {
           {data?.activities
             .filter((item) => (item.period ?? 'ANYTIME') === key)
             .map((item) => (
-              <ActivityRow key={item.id} activity={item} onToggle={() => toggleActivity(item.id)} />
+              <ActivityRow key={item.id} activity={item} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
             ))}
         </View>
       ))}
@@ -58,7 +61,7 @@ export default function RoutineScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -66,17 +69,17 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     marginBottom: 30,
   },
-  title: { color: colors.ink, fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -1 },
+  title: { color: colors.ink, fontSize: 30, lineHeight: 36, fontWeight: '700', letterSpacing: -1 },
   subtitle: { color: colors.muted, fontSize: 15, marginTop: 5 },
   addButton: {
     width: 48,
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 24,
+    borderRadius: 8,
     backgroundColor: colors.primary,
   },
-  addButtonText: { color: colors.surface, fontSize: 27, lineHeight: 29, fontWeight: '500' },
+  addButtonText: { color: colors.onAccent, fontSize: 27, lineHeight: 29, fontWeight: '500' },
   period: { marginBottom: 28 },
   time: { color: colors.muted, fontSize: 12, fontWeight: '700' },
   item: {

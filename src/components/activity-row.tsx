@@ -1,32 +1,37 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, shadows } from '@/src/theme/tokens';
+import { shadows } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import type { AreaKey, DailyActivity } from '@/src/types/today';
 
-const areaAppearance: Record<AreaKey, { background: string; color: string; symbol: string }> = {
+const getAreaAppearance = (colors: Palette): Record<AreaKey, { background: string; color: string; symbol: string }> => ({
   study: { background: colors.tealSoft, color: colors.teal, symbol: 'book' },
   health: { background: colors.blueSoft, color: colors.primary, symbol: 'directions_walk' },
   reading: { background: colors.violetSoft, color: colors.violet, symbol: 'menu_book' },
   sleep: { background: colors.orangeSoft, color: colors.orange, symbol: 'bedtime' },
-};
+});
 
 export function ActivityRow({
   activity,
   onToggle,
+  disabled = false,
 }: {
   activity: DailyActivity;
   onToggle: () => void;
+  disabled?: boolean;
 }) {
-  const appearance = areaAppearance[activity.area];
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+  const appearance = getAreaAppearance(colors)[activity.area];
 
   return (
     <Pressable
       accessibilityRole="checkbox"
       aria-checked={activity.completed}
-      accessibilityState={{ checked: activity.completed, disabled: activity.completed }}
-      disabled={activity.completed}
-      accessibilityLabel={`${activity.title}, ${activity.target}`}
+      accessibilityState={{ checked: activity.completed, disabled }}
+      disabled={disabled}
+      accessibilityLabel={`${activity.title}, ${activity.target}. ${activity.completed ? "Desfazer conclusão" : "Confirmar conclusão"}`}
       onPress={onToggle}
       style={({ pressed }) => [
         styles.row,
@@ -61,7 +66,7 @@ export function ActivityRow({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   row: {
     minHeight: 70,
     flexDirection: 'row',
@@ -71,13 +76,13 @@ const styles = StyleSheet.create({
     marginBottom: 9,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 18,
+    borderRadius: 8,
     backgroundColor: colors.surface,
     ...shadows.soft,
   },
   completedRow: {
-    borderColor: '#C4EFE7',
-    backgroundColor: '#FBFFFE',
+    borderColor: colors.teal,
+    backgroundColor: colors.tealSoft,
   },
   pressed: {
     transform: [{ scale: 0.99 }],
@@ -86,7 +91,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 48,
     height: 48,
-    borderRadius: 15,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -100,7 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   completedTitle: {
-    color: '#244A48',
+    color: colors.ink,
   },
   target: {
     color: colors.muted,
@@ -111,20 +116,20 @@ const styles = StyleSheet.create({
   toggle: {
     width: 34,
     height: 34,
-    borderRadius: 17,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#B9C4D4',
+    borderColor: colors.muted,
   },
   checked: {
     borderColor: colors.teal,
     backgroundColor: colors.teal,
   },
   check: {
-    color: colors.surface,
+    color: colors.onAccent,
     fontSize: 20,
     lineHeight: 22,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

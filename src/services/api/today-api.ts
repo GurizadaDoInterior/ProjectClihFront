@@ -38,6 +38,15 @@ export async function completeHabit(habitId: string) {
     }
   }
 }
+export async function undoHabit(habitId: string, completionId?: string | null) {
+  if (isDemo) {
+    demo = { ...demo, activities: demo.activities.map((item) =>
+      item.id === habitId ? { ...item, completed: false } : item) };
+    return;
+  }
+  if (!completionId) throw new Error('Não foi possível identificar a conclusão. Atualize a rotina e tente novamente.');
+  await request(`/habits/${encodeURIComponent(habitId)}/completions/${encodeURIComponent(completionId)}`, { method: 'DELETE' });
+}
 export const getAreas = () =>
   isDemo
     ? Promise.resolve<Area[]>([

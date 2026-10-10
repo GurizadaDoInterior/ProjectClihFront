@@ -35,6 +35,7 @@ export function mapToday(response: TodayResponse): TodaySummary {
       areaColor: habit.area.color,
       period: habit.dayPeriod,
       completed: habit.completed,
+      completionId: habit.completionId,
     })),
   };
 }

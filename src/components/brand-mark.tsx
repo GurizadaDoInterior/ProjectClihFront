@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 export function BrandMark() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   return (
     <View accessibilityLabel="Marca provisória Clih" style={styles.mark}>
       <Text style={styles.letter}>C</Text>
@@ -10,11 +12,11 @@ export function BrandMark() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   mark: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.blueSoft,
@@ -22,7 +24,7 @@ const styles = StyleSheet.create({
   letter: {
     color: colors.ink,
     fontSize: 25,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontWeight: '700',
+    letterSpacing: -0.3,
   },
 });

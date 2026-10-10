@@ -5,9 +5,12 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppScreen } from '@/src/components/app-screen';
 import { getMe, updateMe } from '@/src/services/api/today-api';
 import type { User } from '@/src/services/api/contracts';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
 export default function EditProfileScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const profile = useQuery({ queryKey: ['me'], queryFn: getMe });
   if (!profile.data)
     return (
@@ -25,6 +28,8 @@ export default function EditProfileScreen() {
 }
 
 function ProfileForm({ user }: { user: User }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [name, setName] = useState(user.displayName);
@@ -114,7 +119,7 @@ function ProfileForm({ user }: { user: User }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette) => themedStyles({
   note: { color: colors.muted, marginVertical: 20, lineHeight: 22 },
   label: { color: colors.ink, fontWeight: '700', marginBottom: 8 },
   input: {
@@ -135,5 +140,5 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 24,
   },
-  buttonText: { color: colors.surface, fontWeight: '800' },
+  buttonText: { color: colors.onAccent, fontWeight: '700' },
 });

@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/src/components/app-screen';
-import { colors, radius } from '@/src/theme/tokens';
+import { radius } from '@/src/theme/tokens';
+import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import { isDemo } from '@/src/services/api/client';
 
 const achievements = [
@@ -32,6 +33,8 @@ const achievements = [
 ];
 
 export default function AchievementsScreen() {
+  const { colors, mode } = useTheme();
+  const styles = getStyles(colors, mode === "dark");
   if (!isDemo)
     return (
       <AppScreen>
@@ -72,13 +75,13 @@ export default function AchievementsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: Palette, dark: boolean) => themedStyles({
   title: {
     color: colors.ink,
     fontSize: 30,
     lineHeight: 36,
-    fontWeight: '800',
-    letterSpacing: -1,
+    fontWeight: '700',
+    letterSpacing: -0.3,
     paddingTop: 18,
   },
   subtitle: { color: colors.muted, fontSize: 15, marginTop: 5, marginBottom: 26 },
@@ -86,11 +89,11 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 22,
     borderRadius: radius.lg,
-    backgroundColor: colors.ink,
+    backgroundColor: dark ? "#D4C9B3" : colors.ink,
   },
-  progressValue: { color: colors.surface, fontSize: 26, fontWeight: '800' },
-  progressLabel: { color: '#B8C4DE', fontSize: 13, marginTop: 3, marginBottom: 14 },
-  track: { height: 7, overflow: 'hidden', borderRadius: 4, backgroundColor: '#344064' },
+  progressValue: { color: dark ? "#171511" : colors.onAccent, fontSize: 26, fontWeight: '700' },
+  progressLabel: { color: dark ? '#171511' : '#D8DFEA', fontSize: 13, marginTop: 3, marginBottom: 14 },
+  track: { height: 7, overflow: 'hidden', borderRadius: 4, backgroundColor: dark ? '#ACA18B' : '#344064' },
   fill: { width: '17%', height: '100%', borderRadius: 4, backgroundColor: colors.orange },
   row: {
     flexDirection: 'row',
@@ -109,14 +112,14 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 8,
     backgroundColor: colors.surfaceMuted,
   },
   unlockedIcon: { backgroundColor: colors.orangeSoft },
-  iconText: { color: colors.muted, fontSize: 20, fontWeight: '800' },
+  iconText: { color: colors.muted, fontSize: 20, fontWeight: '700' },
   unlockedText: { color: colors.orange },
   copy: { flex: 1 },
   name: { color: colors.ink, fontSize: 16, fontWeight: '700' },
   description: { color: colors.muted, fontSize: 13, lineHeight: 18, marginTop: 3 },
-  status: { color: colors.teal, fontSize: 18, fontWeight: '800' },
+  status: { color: colors.teal, fontSize: 18, fontWeight: '700' },
 });
