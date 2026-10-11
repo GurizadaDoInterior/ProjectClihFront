@@ -1,35 +1,12 @@
-import { PropsWithChildren, ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
-import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
-
-type SectionHeaderProps = PropsWithChildren<{
-  action?: ReactNode;
-}>;
-
-export function SectionHeader({ children, action }: SectionHeaderProps) {
+import { PropsWithChildren } from 'react';
+import { Text, View } from 'react-native';
+import { useTheme, themedStyles } from '@/src/theme/theme-provider';
+export function SectionHeader({ children, action }: PropsWithChildren<{ action?: string }>) {
   const { colors } = useTheme();
-  const styles = getStyles(colors);
-  return (
-    <View style={styles.row}>
-      <Text style={styles.title}>{children}</Text>
-      {action}
-    </View>
-  );
+  const styles = themedStyles({
+    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, marginBottom: 4, borderBottomWidth: 1, borderBottomColor: colors.border },
+    title: { color: colors.ink, fontSize: 24, fontWeight: '700' },
+    action: { color: colors.muted, fontSize: 12, fontWeight: '600' },
+  });
+  return <View style={styles.row}><Text style={styles.title}>{children}</Text>{action ? <Text style={styles.action}>{action}</Text> : null}</View>;
 }
-
-const getStyles = (colors: Palette) => themedStyles({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  title: {
-    color: colors.ink,
-    fontSize: 20,
-    lineHeight: 29,
-    fontWeight: '700',
-    letterSpacing: 0,
-  },
-});

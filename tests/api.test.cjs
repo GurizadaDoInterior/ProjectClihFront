@@ -220,3 +220,17 @@ test('undo surfaces server failures so the UI can restore the previous state', a
   global.fetch = async () => Response.json({ message: 'Falha ao cancelar' }, { status: 500 });
   await assert.rejects(undoHabit('h', 'c1'), /Falha ao cancelar/);
 });
+
+test('profile photo upload and removal use authenticated account endpoints', async () => {
+  const { uploadProfilePhoto, removeProfilePhoto } = require('../src/services/api/today-api.ts');
+  setAccessTokenProvider(async () => 'test-token');
+  const calls = [];
+  global.fetch = async (url, init) => { calls.push({url,init}); return new Response(JSON.stringify({ id: 'me', avatarUrl: null }), { status: 200 }); };
+  await uploadProfilePhoto('data:image/jpeg;base64,test');
+  await removeProfilePhoto();
+  assert.equal(calls[0].url, apiUrl + '/me/avatar');
+  assert.equal(calls[0].init.method, 'PUT');
+  assert.equal(calls[0].init.headers.Authorization, 'Bearer test-token');
+  assert.deepEqual(JSON.parse(calls[0].init.body), { image: 'data:image/jpeg;base64,test' });
+  assert.equal(calls[1].init.method, 'DELETE');
+});

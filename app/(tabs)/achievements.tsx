@@ -38,7 +38,7 @@ export default function AchievementsScreen() {
   if (!isDemo)
     return (
       <AppScreen>
-        <Text style={styles.title}>Conquistas</Text>
+        <Text style={styles.title}>CONQUISTAS.</Text>
         <Text style={styles.subtitle}>
           Em breve. O desbloqueio de conquistas ainda não está disponível nesta versão.
         </Text>
@@ -47,10 +47,10 @@ export default function AchievementsScreen() {
   return (
     <AppScreen>
       <Text style={styles.title}>Conquistas</Text>
-      <Text style={styles.subtitle}>Marcos da sua evolução, sem pressão.</Text>
+      <Text style={styles.subtitle}>Seus marcos de constância.</Text>
 
       <View style={styles.progressCard}>
-        <Text style={styles.progressValue}>2 de 12</Text>
+        <Text style={styles.progressValue}>2 / 4</Text>
         <Text style={styles.progressLabel}>conquistas desbloqueadas</Text>
         <View style={styles.track}>
           <View style={styles.fill} />
@@ -78,33 +78,33 @@ export default function AchievementsScreen() {
 const getStyles = (colors: Palette, dark: boolean) => themedStyles({
   title: {
     color: colors.ink,
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 48,
+    lineHeight: 54,
     fontWeight: '700',
     letterSpacing: -0.3,
-    paddingTop: 18,
+    paddingTop: 0,
   },
   subtitle: { color: colors.muted, fontSize: 15, marginTop: 5, marginBottom: 26 },
   progressCard: {
     padding: 20,
     marginBottom: 22,
-    borderRadius: radius.lg,
+    borderRadius: 8,
     backgroundColor: dark ? "#D4C9B3" : colors.ink,
   },
-  progressValue: { color: dark ? "#171511" : colors.onAccent, fontSize: 26, fontWeight: '700' },
+  progressValue: { color: dark ? "#171511" : colors.onAccent, fontSize: 64, fontWeight: '700' },
   progressLabel: { color: dark ? '#171511' : '#D8DFEA', fontSize: 13, marginTop: 3, marginBottom: 14 },
   track: { height: 7, overflow: 'hidden', borderRadius: 4, backgroundColor: dark ? '#ACA18B' : '#344064' },
-  fill: { width: '17%', height: '100%', borderRadius: 4, backgroundColor: colors.orange },
+  fill: { width: '50%', height: '100%', borderRadius: 4, backgroundColor: colors.orange },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 14,
     marginBottom: 11,
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
+    borderRadius: 0,
+    backgroundColor: colors.background,
   },
   locked: { opacity: 0.62 },
   icon: {

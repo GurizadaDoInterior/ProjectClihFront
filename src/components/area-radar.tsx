@@ -1,68 +1,29 @@
-import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Line, Polygon } from 'react-native-svg';
-
-import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
-import type { AreaKey } from '@/src/types/today';
-
-const labels: Array<{ key: AreaKey; label: string }> = [
-  { key: 'study', label: 'Estudo' },
-  { key: 'health', label: 'Saúde' },
-  { key: 'sleep', label: 'Sono' },
-  { key: 'reading', label: 'Leitura' },
-];
-
-const center = 65;
-const radius = 48;
-
-function point(index: number, value: number) {
-  const angle = -Math.PI / 2 + index * (Math.PI / 2);
-  return `${center + Math.cos(angle) * radius * value},${center + Math.sin(angle) * radius * value}`;
-}
-
-export function AreaRadar({ values }: { values: Record<AreaKey, number> }) {
+import { View } from 'react-native';
+import Svg, { Circle, G, Line, Polygon, Text as SvgText } from 'react-native-svg';
+import { useTheme } from '@/src/theme/theme-provider';
+export type RadarArea = { id: string; name: string; value: number };
+export function AreaRadar({ areas }: { areas: RadarArea[] }) {
   const { colors } = useTheme();
-  const styles = getStyles(colors);
-  const valuePoints = labels.map(({ key }, index) => point(index, values[key])).join(' ');
-  const outer = labels.map((_, index) => point(index, 1)).join(' ');
-  const middle = labels.map((_, index) => point(index, 0.55)).join(' ');
-
-  return (
-    <View accessibilityLabel="Equilíbrio entre áreas" style={styles.wrapper}>
-      <Text style={[styles.label, styles.top]}>Estudo</Text>
-      <Text style={[styles.label, styles.right]}>Saúde</Text>
-      <Text style={[styles.label, styles.bottom]}>Sono</Text>
-      <Text style={[styles.label, styles.left]}>Leitura</Text>
-      <Svg width={130} height={130}>
-        <Polygon points={outer} fill="none" stroke={colors.border} strokeWidth={1.5} />
-        <Polygon points={middle} fill="none" stroke={colors.border} strokeWidth={1} />
-        <Line x1={center} y1={17} x2={center} y2={113} stroke={colors.border} strokeWidth={1} />
-        <Line x1={17} y1={center} x2={113} y2={center} stroke={colors.border} strokeWidth={1} />
-        <Polygon
-          points={valuePoints}
-          fill="rgba(47, 99, 238, 0.22)"
-          stroke={colors.primary}
-          strokeWidth={2}
-        />
-      </Svg>
-    </View>
-  );
+  if (areas.length < 3) return null;
+  const point = (index: number, scale: number) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / areas.length;
+    return { x: 180 + Math.cos(angle) * 100 * scale, y: 180 + Math.sin(angle) * 100 * scale };
+  };
+  const points = (scale: number) => areas.map((_, i) => { const p = point(i, scale); return p.x + ',' + p.y; }).join(' ');
+  const values = areas.map((area, i) => { const p = point(i, Math.max(0, Math.min(100, area.value)) / 100); return p.x + ',' + p.y; }).join(' ');
+  return <View accessible accessibilityRole="image" accessibilityLabel={'Desempenho por área: ' + areas.map(a => a.name + ' ' + a.value + '%').join(', ')} style={{ width: '100%', maxWidth: 440, alignSelf: 'center', aspectRatio: 1 }}>
+    <Svg width="100%" height="100%" viewBox="0 0 360 360">
+      {[0.25, 0.5, 0.75, 1].map(scale => <Polygon key={scale} points={points(scale)} fill="none" stroke={colors.border} strokeWidth={scale === 1 ? 1.5 : 1} />)}
+      {areas.map((area, i) => { const p = point(i, 1); return <Line key={area.id} x1={180} y1={180} x2={p.x} y2={p.y} stroke={colors.border} />; })}
+      <Polygon points={values} fill={colors.orange} fillOpacity={0.2} stroke={colors.orange} strokeWidth={2.5} strokeLinejoin="round" />
+      {areas.map((area, i) => {
+        const dot = point(i, Math.max(0, Math.min(100, area.value)) / 100);
+        const label = point(i, 1.36);
+        return <ViewlessPoint key={area.id} x={dot.x} y={dot.y} labelX={label.x} labelY={label.y} name={area.name} value={area.value} color={colors.orange} ink={colors.ink} muted={colors.muted} />;
+      })}
+    </Svg>
+  </View>;
 }
-
-const getStyles = (colors: Palette) => themedStyles({
-  wrapper: {
-    width: 160,
-    height: 174,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    position: 'absolute',
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  top: { top: 0 },
-  right: { right: -3, top: 80 },
-  bottom: { bottom: 0 },
-  left: { left: -5, top: 80 },
-});
+function ViewlessPoint({ x, y, labelX, labelY, name, value, color, ink, muted }: { x:number; y:number; labelX:number; labelY:number; name:string; value:number; color:string; ink:string; muted:string }) {
+  return <G><Circle cx={x} cy={y} r={4} fill={color} /><SvgText fontFamily="SourceSans" x={labelX} y={labelY - 3} textAnchor="middle" fontSize={12} fontWeight="600" fill={muted}>{name.length > 16 ? name.slice(0,15) + '…' : name}</SvgText><SvgText fontFamily="SourceSans" x={labelX} y={labelY + 15} textAnchor="middle" fontSize={16} fontWeight="700" fill={ink}>{value}%</SvgText></G>;
+}

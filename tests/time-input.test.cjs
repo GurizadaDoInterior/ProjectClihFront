@@ -24,3 +24,14 @@ test('three or four digits normalize to a complete time', () => {
   assert.equal(normalizeTimeInput('00:00'), '00:00');
   assert.equal(normalizeTimeInput('25:70'), '25:70'); // schema rejects invalid ranges
 });
+
+test('rejects impossible hours and minutes without replacing the previous input', () => {
+  assert.equal(formatTimeInput('28', '2'), '2');
+  assert.equal(formatTimeInput('2899', '23:00'), '23:00');
+  assert.equal(formatTimeInput('23:6', '23'), '23');
+  assert.equal(formatTimeInput('2399', ''), '');
+  assert.equal(formatTimeInput('2359'), '23:59');
+  assert.equal(formatTimeInput('0000'), '00:00');
+  assert.equal(formatTimeInput('7'), '07');
+  assert.equal(formatTimeInput('730'), '07:30');
+});

@@ -86,3 +86,6 @@ export async function createHabit(values: CreateHabit) {
   }
   await request('/habits', { method: 'POST', body: JSON.stringify(values) });
 }
+
+export const uploadProfilePhoto = (image: string) => request<User>('/me/avatar', { method: 'PUT', body: JSON.stringify({ image }) });
+export const removeProfilePhoto = () => request<User>('/me/avatar', { method: 'DELETE' });

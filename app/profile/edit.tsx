@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { TimezoneSelect } from '@/src/components/timezone-select';
+import { ProfilePhotoEditor } from '@/src/components/profile-photo-editor';
 import { AppScreen } from '@/src/components/app-screen';
 import { getMe, updateMe } from '@/src/services/api/today-api';
 import type { User } from '@/src/services/api/contracts';
@@ -53,7 +55,7 @@ function ProfileForm({ user }: { user: User }) {
     try {
       new Intl.DateTimeFormat('pt-BR', { timeZone: timezone.trim() });
     } catch {
-      setError('Informe um fuso válido, como America/Sao_Paulo.');
+      setError('Selecione um fuso horário válido.');
       return;
     }
     setSaving(true);
@@ -67,7 +69,8 @@ function ProfileForm({ user }: { user: User }) {
       });
       queryClient.setQueryData(['me'], updated);
       await queryClient.invalidateQueries({ queryKey: ['today'] });
-      router.back();
+      if (router.canGoBack()) router.back();
+      else router.replace('/profile');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Não foi possível salvar o perfil.');
     } finally {
@@ -76,6 +79,7 @@ function ProfileForm({ user }: { user: User }) {
   }
   return (
     <AppScreen>
+      <ProfilePhotoEditor user={user} />
       <Text style={styles.note}>
         Seu fuso define o dia usado na rotina e na sequência de atividades.
       </Text>
@@ -97,16 +101,7 @@ function ProfileForm({ user }: { user: User }) {
         maxLength={30}
       />
       <Text style={styles.label}>Fuso horário</Text>
-      <TextInput
-        accessibilityLabel="Fuso horário"
-        style={styles.input}
-        value={timezone}
-        onChangeText={setTimezone}
-        autoCapitalize="none"
-      />
-      <Pressable onPress={() => setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)}>
-        <Text style={styles.link}>Usar fuso deste aparelho</Text>
-      </Pressable>
+      <TimezoneSelect value={timezone} onChange={setTimezone} />
       {error ? (
         <Text accessibilityRole="alert" style={styles.error}>
           {error}
@@ -128,14 +123,14 @@ const getStyles = (colors: Palette) => themedStyles({
     padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
+    borderRadius: 8,
     marginBottom: 20,
   },
   link: { color: colors.primary, paddingVertical: 10 },
   error: { color: colors.danger, marginTop: 16 },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: radius.md,
+    borderRadius: 8,
     alignItems: 'center',
     padding: 16,
     marginTop: 24,

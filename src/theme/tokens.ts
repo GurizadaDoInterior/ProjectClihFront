@@ -1,30 +1,17 @@
 export const lightColors = {
-  background: '#F5F4F0',
-  surface: '#FFFFFF',
-  surfaceMuted: '#F0F3F8',
-  ink: '#172131',
-  muted: '#60708C',
-  border: '#E1E7F0',
-  primary: '#243B5A',
-  teal: '#304D70',
-  tealSoft: '#EAF0F7',
-  orange: '#BC521F',
-  orangeSoft: '#FFF1E8',
-  violet: '#7B61F2',
-  violetSoft: '#F0ECFF',
-  blueSoft: '#E8EDF4',
-  danger: '#D84A4A',
-  onAccent: '#FFFFFF',
-  hero: '#1D2B40',
-  heroMuted: '#CDD6E3',
+  background: '#F2F0E9', surface: '#FAF9F5', surfaceMuted: '#E5E2D9',
+  ink: '#191A1B', muted: '#62635F', border: '#D3D1C8',
+  primary: '#26364A', teal: '#26364A', tealSoft: '#E1E5E9',
+  orange: '#B6471D', orangeSoft: '#F4E2D5', violet: '#645A6B', violetSoft: '#E9E4EB',
+  blueSoft: '#E1E5E9', danger: '#BC3831', onAccent: '#FFFFFF', hero: '#1C2430', heroMuted: '#C9CFD7',
 } as const;
 export type Palette = { [K in keyof typeof lightColors]: string };
 export const darkColors: Palette = {
-  background: '#181714', surface: '#24221D', surfaceMuted: '#302D25',
-  ink: '#F5F0E6', muted: '#BDB4A2', border: '#443F33',
-  primary: '#E8B64F', teal: '#E8B64F', tealSoft: '#3A3020',
-  orange: '#F2A65A', orangeSoft: '#3C2C20', violet: '#C4ACD0', violetSoft: '#342C38',
-  blueSoft: '#3A3020', danger: '#F39483', onAccent: '#261D0C', hero: '#332B1D', heroMuted: '#D6C5A0',
+  background: '#131313', surface: '#1D1D1C', surfaceMuted: '#292825',
+  ink: '#F5F3EC', muted: '#B1AEA5', border: '#3C3A34',
+  primary: '#F0AD45', teal: '#F0AD45', tealSoft: '#332B20',
+  orange: '#F0AD45', orangeSoft: '#332B20', violet: '#B8ACBD', violetSoft: '#302B32',
+  blueSoft: '#2C2D2E', danger: '#F39483', onAccent: '#191610', hero: '#23221E', heroMuted: '#D8CEB9',
 };
 export const colors = lightColors;
 

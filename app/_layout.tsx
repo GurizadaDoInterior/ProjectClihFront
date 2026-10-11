@@ -1,3 +1,4 @@
+import { BarlowCondensed_600SemiBold, BarlowCondensed_700Bold } from '@expo-google-fonts/barlow-condensed';
 import { SourceSans3_400Regular, SourceSans3_600SemiBold, SourceSans3_700Bold } from '@expo-google-fonts/source-sans-3';
 import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { StatusBar } from 'expo-status-bar';
@@ -14,7 +15,7 @@ export { ErrorBoundary } from 'expo-router';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({ Manrope: Manrope_400Regular, ManropeMedium: Manrope_500Medium, ManropeBold: Manrope_700Bold, SourceSans: SourceSans3_400Regular, SourceSansSemiBold: SourceSans3_600SemiBold, SourceSansBold: SourceSans3_700Bold });
+  const [loaded, error] = useFonts({ Manrope: Manrope_400Regular, ManropeMedium: Manrope_500Medium, ManropeBold: Manrope_700Bold, SourceSans: SourceSans3_400Regular, SourceSansSemiBold: SourceSans3_600SemiBold, SourceSansBold: SourceSans3_700Bold, Barlow: BarlowCondensed_600SemiBold, BarlowBold: BarlowCondensed_700Bold });
   useEffect(() => { if (loaded || error) SplashScreen.hideAsync(); }, [loaded, error]);
   if (!loaded && !error) return null;
   return <AppProviders><Navigation /></AppProviders>;

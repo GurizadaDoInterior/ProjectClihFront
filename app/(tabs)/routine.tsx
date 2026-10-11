@@ -22,8 +22,8 @@ export default function RoutineScreen() {
     <AppScreen>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Sua rotina</Text>
-          <Text style={styles.subtitle}>Organize o dia sem perder o ritmo.</Text>
+          <Text style={styles.subtitle}>PLANEJAMENTO DIÁRIO</Text><Text style={styles.title}>SUA ROTINA.</Text>
+          <Text style={styles.subtitle}>Suas atividades, organizadas por período.</Text>
         </View>
         <Link href="/habit/new" asChild>
           <Pressable accessibilityRole="button" style={styles.addButton}>
@@ -47,7 +47,7 @@ export default function RoutineScreen() {
       {data && !data.activities.length ? (
         <Text style={styles.subtitle}>Nenhuma atividade para hoje. Use + para criar uma.</Text>
       ) : null}
-      {groups.map(([key, title]) => (
+      {groups.filter(([key]) => data?.activities.some(item => (item.period ?? 'ANYTIME') === key)).map(([key, title]) => (
         <View key={key} style={styles.period}>
           <SectionHeader>{title}</SectionHeader>
           {data?.activities
@@ -66,10 +66,10 @@ const getStyles = (colors: Palette) => themedStyles({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 18,
+    paddingTop: 0,
     marginBottom: 30,
   },
-  title: { color: colors.ink, fontSize: 30, lineHeight: 36, fontWeight: '700', letterSpacing: -1 },
+  title: { color: colors.ink, fontSize: 46, lineHeight: 52, fontWeight: '700', letterSpacing: -1 },
   subtitle: { color: colors.muted, fontSize: 15, marginTop: 5 },
   addButton: {
     width: 48,
