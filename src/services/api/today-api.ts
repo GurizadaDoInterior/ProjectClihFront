@@ -21,7 +21,7 @@ export async function completeHabit(habitId: string) {
   const idempotencyKey = `${habitId}:${completedAt}`;
   for (let attempt = 0; ; attempt++) {
     try {
-      await request(`/habits/${habitId}/completions`, {
+      return await request<{ xpAwarded: number; idempotentReplay: boolean }>(`/habits/${habitId}/completions`, {
         method: 'POST',
         headers: { 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify({ completedAt }),

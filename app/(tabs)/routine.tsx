@@ -11,7 +11,7 @@ import { ActivityRow } from '@/src/components/activity-row';
 export default function RoutineScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const { data, error, refetch, toggleActivity, completionError, isToggling } = useTodaySummary();
+  const { data, error, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   const groups = [
     ['MORNING', 'Manhã'],
     ['AFTERNOON', 'Tarde'],
@@ -53,7 +53,7 @@ export default function RoutineScreen() {
           {data?.activities
             .filter((item) => (item.period ?? 'ANYTIME') === key)
             .map((item) => (
-              <ActivityRow key={item.id} activity={item} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
+              <ActivityRow key={item.id} activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
             ))}
         </View>
       ))}

@@ -13,7 +13,7 @@ import { isDemo } from '@/src/services/api/client';
 export default function TodayScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling } = useTodaySummary();
+  const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
   if (isError || !data) return <AppScreen>
     <Text style={styles.title}>VAMOS TENTAR DE NOVO.</Text>
@@ -56,9 +56,9 @@ export default function TodayScreen() {
 
     <View style={styles.sectionLine}><Text style={styles.section}>NA SUA LISTA</Text><Link href="/routine" style={styles.textLink}>VER ROTINA ↗</Link></View>
     {completionError ? <Text accessibilityRole="alert" style={styles.error}>{completionError.message}</Text> : null}
-    {isToggling ? <Text style={styles.sub}>Salvando alteração...</Text> : null}
+
     {!total ? <Link href="/habit/new" style={styles.textLink}>Adicionar sua primeira atividade →</Link> : null}
-    {data.activities.map(activity => <ActivityRow key={activity.id} activity={activity} disabled={isToggling} onToggle={() => toggle(activity.id)} />)}
+    {data.activities.map(activity => <ActivityRow key={activity.id} activity={activity} xpReward={xpReward?.habitId === activity.id ? xpReward : null} disabled={isToggling} onToggle={() => toggle(activity.id)} />)}
 
     <Link href="/sleep" asChild><Pressable accessibilityRole="button" style={styles.sleep}>
       <View><Text style={styles.eyebrow}>RECUPERAÇÃO</Text><Text style={styles.sleepTitle}>O descanso também conta.</Text><Text style={styles.sub}>Registrar horários de sono</Text></View>
