@@ -21,8 +21,12 @@ export default function RoutineScreen() {
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<DailyActivity | null>(null);
   const deletion = useMutation({
-    mutationFn: deleteHabit,
-    onSuccess: (_result, deletedId) => {
+    mutationFn: async ({id, animateRemoval}: {id:string; animateRemoval?:()=>Promise<void>}) => {
+      await deleteHabit(id);
+      await animateRemoval?.();
+      return id;
+    },
+    onSuccess: (deletedId) => {
       queryClient.setQueryData<TodaySummary>(['today'], current => current ? { ...current, activities: current.activities.filter(activity => activity.id !== deletedId) } : current);
       setDeleting(null);
       for (const key of ['today', 'day-history', 'calendar-activities']) void queryClient.invalidateQueries({ queryKey: [key] });
@@ -71,9 +75,9 @@ export default function RoutineScreen() {
             .filter((item) => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))
             .map((item) => (
               <View key={item.id}>
-              <SwipeToDelete onFullSwipe={() => deletion.mutateAsync(item.id)} disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} /></SwipeToDelete>
+              <SwipeToDelete onFullSwipe={animateRemoval => deletion.mutateAsync({id:item.id,animateRemoval})} disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling || deletion.isPending} onToggle={() => toggleActivity(item.id)} />
               <Pressable accessibilityRole="button" accessibilityLabel={'Excluir atividade '+item.title} disabled={isToggling || deletion.isPending} onPress={() => { deletion.reset(); setDeleting(item); }} style={({pressed}) => ({alignSelf:'flex-end',paddingVertical:10,paddingLeft:18,opacity:pressed?0.7:1})}><Text style={{color:colors.danger,fontSize:12,fontWeight:'600'}}>Excluir atividade</Text></Pressable>
-              </View>
+              </SwipeToDelete></View>
             ))}
         </View>
       ))}
@@ -85,7 +89,7 @@ export default function RoutineScreen() {
             {deletion.error ? <Text accessibilityRole="alert" style={{color:colors.danger}}>{deletion.error.message}</Text> : null}
             <View style={{flexDirection:'row',gap:12}}>
               <Pressable disabled={deletion.isPending} onPress={() => setDeleting(null)} style={{flex:1,padding:14,alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:8}}><Text style={{color:colors.ink,fontWeight:'700'}}>Cancelar</Text></Pressable>
-              <Pressable disabled={deletion.isPending} onPress={() => {if(deleting)deletion.mutate(deleting.id);}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{deletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
+              <Pressable disabled={deletion.isPending} onPress={() => {if(deleting)deletion.mutate({id:deleting.id});}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{deletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
             </View>
           </View>
         </View>

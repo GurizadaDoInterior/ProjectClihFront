@@ -1,7 +1,7 @@
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect, type Href } from 'expo-router';
 import { BackButton } from './back-button';
-import { AccessibilityInfo, Animated, Easing, ScrollView, View, Text } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Platform, ScrollView, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeToggle } from './theme-toggle';
 import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
@@ -9,6 +9,7 @@ type AppScreenProps = PropsWithChildren<{ scroll?: boolean; testID?: string; bac
 export function AppScreen({ children, scroll = true, testID, backTo }: AppScreenProps) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+  const screen = useRef<View>(null);
   const reveal = useRef(new Animated.Value(1)).current;
   const [reduceMotion, setReduceMotion] = useState(true);
   useEffect(() => {
@@ -18,6 +19,12 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
     return ()=>{active=false;listener.remove();};
   },[]);
   useFocusEffect(useCallback(()=>{
+    if(Platform.OS === 'web') {
+      const element=screen.current as unknown as HTMLElement | null;
+      if(reduceMotion || typeof element?.animate !== 'function')return;
+      const animation=element.animate([{opacity:0.97},{opacity:1}],{duration:150,easing:'ease-out'});
+      return ()=>animation.cancel();
+    }
     reveal.stopAnimation();
     if(reduceMotion){reveal.setValue(1);return;}
     reveal.setValue(0);
@@ -30,7 +37,7 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
     <ThemeToggle />
   </View>;
   return <SafeAreaView edges={['top']} style={styles.safe} testID={testID}>
-    <Animated.View style={{flex:1,opacity:reveal.interpolate({inputRange:[0,1],outputRange:[0.94,1]}),transform:[{translateY:reveal.interpolate({inputRange:[0,1],outputRange:[3,0]})}]}}>
+    <Animated.View ref={screen} style={Platform.OS === 'web' ? {flex:1} : {flex:1,opacity:reveal.interpolate({inputRange:[0,1],outputRange:[0.94,1]}),transform:[{translateY:reveal.interpolate({inputRange:[0,1],outputRange:[3,0]})}]}}>
     {scroll ? <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>{masthead}{backTo ? <BackButton fallback={backTo}/> : null}{children}</ScrollView>
       : <View style={[styles.content, { flex: 1 }]}>{masthead}{backTo ? <BackButton fallback={backTo}/> : null}{children}</View>}
     </Animated.View>
