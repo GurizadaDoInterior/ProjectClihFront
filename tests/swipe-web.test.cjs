@@ -5,14 +5,14 @@ const vm = require('node:vm');
 const ts = require('typescript');
 function load(path,requireFn){const mod={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{module:mod,exports:mod.exports,require:requireFn,Date});return mod.exports;}
 const logic=load('src/components/swipe-gesture.ts',()=>{});
-function render(disabled=false){
+function render(disabled=false,failFullSwipe=false){
   const refs=[];let opened=false,deleted=0;
   const react={useRef:value=>{const ref={current:value};refs.push(ref);return ref;},useState:()=>[false,value=>{opened=value;}],useEffect:callback=>callback()};
   const jsx=(type,props)=>({type,props});
   const {SwipeToDelete}=load('src/components/swipe-to-delete.web.tsx',name=>name==='react'?react:name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='react-native'?{Text:'text'}:name.includes('motion-pressable')?{MotionPressable:'button'}:name.includes('use-reduced-motion')?{useReducedMotion:()=>false}:name.includes('swipe-gesture')?logic:{useTheme:()=>({colors:{background:'#fff',danger:'#f00'}})});
-  const tree=SwipeToDelete({disabled,children:'activity',onDelete:()=>deleted++});
+  const tree=SwipeToDelete({disabled,children:'activity',onDelete:()=>deleted++,onFullSwipe:()=>{deleted++;return failFullSwipe ? Promise.reject(new Error('API failed')) : Promise.resolve();}});
   const surface=tree.props.children[1];
-  const node={style:{},captured:false,setPointerCapture(){this.captured=true;},hasPointerCapture(){return this.captured;},releasePointerCapture(){this.captured=false;}};
+  const node={style:{},clientWidth:400,captured:false,setPointerCapture(){this.captured=true;},hasPointerCapture(){return this.captured;},releasePointerCapture(){this.captured=false;}};
   refs[0].current=node;
   const event=(x,y)=>({pointerType:'mouse',button:0,pointerId:1,clientX:x,clientY:y,currentTarget:node,prevented:false,stopped:false,preventDefault(){this.prevented=true;},stopPropagation(){this.stopped=true;}});
   return {handlers:surface.props,node,event,get opened(){return opened;},get deleted(){return deleted;}};
@@ -32,4 +32,16 @@ test('web vertical scrolling leaves the activity in place and still allows ordin
 test('cancelled and disabled web gestures never reveal or delete activities',()=>{
   const ui=render();ui.handlers.onPointerDownCapture(ui.event(140,20));ui.handlers.onPointerMove(ui.event(60,22));ui.handlers.onPointerCancel();assert.equal(ui.opened,false);assert.equal(ui.node.style.transform,'translateX(0px)');assert.equal(ui.deleted,0);
   const locked=render(true);locked.handlers.onPointerDownCapture(locked.event(140,20));locked.handlers.onPointerMove(locked.event(60,22));locked.handlers.onPointerUp(locked.event(60,22));assert.equal(locked.opened,false);assert.equal(locked.node.captured,false);
+});
+
+test('full web swipe deletes once without requiring the revealed button',async()=>{
+  const ui=render();ui.handlers.onPointerDownCapture(ui.event(380,20));ui.handlers.onPointerMove(ui.event(20,22));ui.handlers.onPointerUp(ui.event(20,22));
+  await new Promise(setImmediate);
+  assert.equal(ui.deleted,1);assert.equal(ui.node.style.transform,'translateX(-400px)');
+  ui.handlers.onPointerUp(ui.event(20,22));await new Promise(setImmediate);assert.equal(ui.deleted,1);
+});
+test('failed full swipe restores the row so deletion can be retried',async()=>{
+  const ui=render(false,true);ui.handlers.onPointerDownCapture(ui.event(380,20));ui.handlers.onPointerMove(ui.event(20,22));ui.handlers.onPointerUp(ui.event(20,22));
+  await new Promise(setImmediate);
+  assert.equal(ui.deleted,1);assert.equal(ui.node.style.transform,'translateX(0px)');assert.equal(ui.opened,false);
 });

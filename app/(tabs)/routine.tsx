@@ -60,6 +60,7 @@ export default function RoutineScreen() {
           {completionError.message}
         </Text>
       ) : null}
+      {deletion.error && !deleting ? <Text accessibilityRole="alert" style={{color:colors.danger}}>Não foi possível excluir a atividade. {deletion.error.message}</Text> : null}
       {data && !data.activities.length ? (
         <Text style={styles.subtitle}>Nenhuma atividade para hoje. Use + para criar uma.</Text>
       ) : null}
@@ -70,7 +71,7 @@ export default function RoutineScreen() {
             .filter((item) => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))
             .map((item) => (
               <View key={item.id}>
-              <SwipeToDelete disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} /></SwipeToDelete>
+              <SwipeToDelete onFullSwipe={() => deletion.mutateAsync(item.id)} disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} /></SwipeToDelete>
               <Pressable accessibilityRole="button" accessibilityLabel={'Excluir atividade '+item.title} disabled={isToggling || deletion.isPending} onPress={() => { deletion.reset(); setDeleting(item); }} style={({pressed}) => ({alignSelf:'flex-end',paddingVertical:10,paddingLeft:18,opacity:pressed?0.7:1})}><Text style={{color:colors.danger,fontSize:12,fontWeight:'600'}}>Excluir atividade</Text></Pressable>
               </View>
             ))}

@@ -25,3 +25,12 @@ test('swipe snaps open after intent threshold and otherwise closes',()=>{
   assert.equal(swipeDestination(-90),-100);
   assert.equal(swipeDestination(swipeOffset(-100,80)),0);
 });
+
+test('full swipe requires most of the row and never triggers on a short reveal',()=>{
+  const {isFullSwipe}=moduleOutput.exports;
+  assert.equal(isFullSwipe(-100,400),false);
+  assert.equal(isFullSwipe(-319,400),false);
+  assert.equal(isFullSwipe(-320,400),true);
+  assert.equal(swipeOffset(0,-500,400),-400);
+  assert.equal(isFullSwipe(-80,100),false);
+});
