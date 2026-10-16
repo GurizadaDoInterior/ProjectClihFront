@@ -6,7 +6,7 @@ export const flameStages = [
   { days: 50, color: '#3291C4', core: '#C8F4FF', name: 'Órbita azul', size: 33 },
   { days: 100, color: '#8D63CD', core: '#EBDAFF', name: 'Exploração violeta', size: 35 },
   { days: 200, color: '#D05DAD', core: '#FFE0F3', name: 'Viagem estelar', size: 37 },
-  { days: 300, color: '#A6B6C9', core: '#FFFFFF', name: 'Missão lendária', size: 39 },
+  { days: 300, color: '#E52686', core: '#FFC9EC', name: 'Missão lendária', size: 39 },
 ] as const;
 export function getFlameStage(days: number) {
   return [...flameStages].reverse().find(stage => days >= stage.days) ?? flameStages[0];
