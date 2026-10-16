@@ -31,14 +31,14 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
             <Path d={`M${44-x} ${y} q2 2 1 ${3 + power * 0.45}`} />
           </G>;
         })}
-        <Path d="M15 23 Q9 26 8 33 L8 36 L16 32 Z M29 23 Q35 26 36 33 L36 36 L28 32 Z" fill={accent} />
-        <Path d="M22 4 C17 8 14 16 15 25 Q15 30 18 33 L26 33 Q29 30 29 25 C30 16 27 8 22 4 Z" fill={body} stroke={edge} strokeWidth={1.2} strokeLinejoin="round" />
-        <Path d="M22 4 Q17.5 8 15.6 14 L28.4 14 Q26.5 8 22 4 Z" fill={accent} />
-        <Path d="M22 14 L28.4 14 Q30 26 26 33 L22 33 Z" fill={edge} opacity={0.14} />
-        <Circle cx={22} cy={21} r={4.6} fill={edge} />
-        <Circle cx={22} cy={21} r={3.1} fill="#7297A6" />
-        <Path d="M22 28 L20 35 L24 35 Z" fill={accent} />
-        <Path d="M18 34 L26 34 L26 37 L18 37 Z" fill={edge} />
+        <Path d="M17 21 L8 30 L7 36 L17 31 Z M27 21 L36 30 L37 36 L27 31 Z" fill={edge} />
+        <Path d="M16 25 L10 31 L10 33 L17 29 Z M28 25 L34 31 L34 33 L27 29 Z" fill={accent} />
+        <Path d="M22 3 L27.5 14 Q29 18 27.5 25 L25 34 L19 34 L16.5 25 Q15 18 16.5 14 Z" fill={body} stroke={edge} strokeWidth={1} strokeLinejoin="round" />
+        <Path d="M22 3 L27.5 14 Q29 18 27.5 25 L25 34 L22 34 Z" fill={edge} opacity={0.18} />
+        <Path d="M22 13 L24.5 18 L24 23 L20 23 L19.5 18 Z" fill={edge} />
+        <Path d="M22 15.5 L23.1 18.5 L22.8 21.5 L21.2 21.5 L20.9 18.5 Z" fill="#8DB7C6" />
+        <Path d="M18.5 27 L20 31 L24 31 L25.5 27" stroke={accent} strokeWidth={1.8} fill="none" />
+        <Path d="M18.5 34 L25.5 34 L27 37 L17 37 Z" fill={edge} />
       </G>
     </Svg>
   </View>;
