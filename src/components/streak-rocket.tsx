@@ -10,7 +10,7 @@ export function StreakRocket({ days }: { days: number }) {
   const tail = 58 + power * 0.85;
   const outline = '#293C55';
   return <View accessible accessibilityRole="image" accessibilityLabel={`Foguete: ${stage.name}, ${days} dias em sequência`}>
-    <Svg width={64} height={64} viewBox="-10 -6 72 76">
+    <Svg width={76} height={76} viewBox="-10 -6 72 76">
       <Defs>
         <LinearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
           <Stop offset="0" stopColor="#FFFFFF" />
