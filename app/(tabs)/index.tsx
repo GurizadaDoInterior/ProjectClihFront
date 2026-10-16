@@ -4,7 +4,7 @@ import { Link } from 'expo-router';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { ActivityRow } from '@/src/components/activity-row';
 import { AppScreen } from '@/src/components/app-screen';
-import { StreakFlame } from '@/src/components/streak-flame';
+import { StreakRocket } from '@/src/components/streak-rocket';
 import { getFlameStage } from '@/src/features/streak/flame';
 import { WeekStrip } from '@/src/components/week-strip';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
@@ -49,7 +49,7 @@ export default function TodayScreen() {
     </View>
 
     <View style={styles.metrics}>
-      <View style={styles.metric}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StreakFlame days={data.streakDays} /><Text style={[styles.metricNumber, { color: getFlameStage(data.streakDays).color }]}>{data.streakDays}</Text></View><Text style={styles.metricLabel}>DIAS EM SEQUÊNCIA</Text></View>
+      <View style={styles.metric}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StreakRocket days={data.streakDays} /><Text style={[styles.metricNumber, { color: getFlameStage(data.streakDays).color }]}>{data.streakDays}</Text></View><Text style={styles.metricLabel}>DIAS EM SEQUÊNCIA</Text></View>
       <View style={[styles.metric, styles.metricMiddle]}><Text style={styles.metricNumber}>{data.level}<Text style={styles.metricUnit}> NÍVEL</Text></Text><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
       <View style={styles.metric}><Text style={styles.metricNumber}>{data.xp.toLocaleString('pt-BR')}</Text><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
     </View>
