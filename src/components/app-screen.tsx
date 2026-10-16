@@ -21,7 +21,7 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
     reveal.stopAnimation();
     if(reduceMotion){reveal.setValue(1);return;}
     reveal.setValue(0);
-    const animation=Animated.timing(reveal,{toValue:1,duration:220,easing:Easing.out(Easing.cubic),useNativeDriver:true});
+    const animation=Animated.timing(reveal,{toValue:1,duration:180,easing:Easing.out(Easing.cubic),useNativeDriver:true});
     animation.start();
     return ()=>animation.stop();
   },[reduceMotion,reveal]));
@@ -30,7 +30,7 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
     <ThemeToggle />
   </View>;
   return <SafeAreaView edges={['top']} style={styles.safe} testID={testID}>
-    <Animated.View style={{flex:1,opacity:reveal.interpolate({inputRange:[0,1],outputRange:[0.75,1]}),transform:[{translateY:reveal.interpolate({inputRange:[0,1],outputRange:[6,0]})}]}}>
+    <Animated.View style={{flex:1,opacity:reveal.interpolate({inputRange:[0,1],outputRange:[0.94,1]}),transform:[{translateY:reveal.interpolate({inputRange:[0,1],outputRange:[3,0]})}]}}>
     {scroll ? <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>{masthead}{backTo ? <BackButton fallback={backTo}/> : null}{children}</ScrollView>
       : <View style={[styles.content, { flex: 1 }]}>{masthead}{backTo ? <BackButton fallback={backTo}/> : null}{children}</View>}
     </Animated.View>

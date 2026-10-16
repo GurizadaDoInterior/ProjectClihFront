@@ -1,3 +1,4 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'expo-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -5,7 +6,7 @@ import { SleepHistory, dateKey, type SleepEntry } from '@/src/components/sleep-h
 import { request } from '@/src/services/api/client';
 import { mapToday } from '@/src/services/api/today-mapper';
 import type { TodayResponse } from '@/src/services/api/contracts';
-import { AccessibilityInfo, Animated, Easing, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Text, View } from 'react-native';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { AreaRadar } from '@/src/components/area-radar';
 import { WeekStrip } from '@/src/components/week-strip';

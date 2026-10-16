@@ -1,3 +1,4 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useRouter } from 'expo-router';
 import { sleepQualityColor } from '@/src/features/sleep/quality-colors';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Animated, Easing, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 import { formatTimeInput, normalizeTimeInput } from '@/src/features/sleep/time-input';
 

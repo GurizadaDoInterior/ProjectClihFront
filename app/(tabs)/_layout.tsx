@@ -1,3 +1,6 @@
+import type { Ref } from 'react';
+import type { View } from 'react-native';
+import { MotionPressable } from '@/src/components/motion-pressable';
 import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +22,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarButton: ({ref, ...props}) => <MotionPressable {...props} ref={ref as Ref<View>} />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelPosition: 'below-icon',

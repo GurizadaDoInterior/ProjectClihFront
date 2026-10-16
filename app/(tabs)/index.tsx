@@ -1,7 +1,8 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
-import { Platform, Pressable, Text, View, useWindowDimensions } from 'react-native';
+import { Platform, Text, View, useWindowDimensions } from 'react-native';
 import { ActivityRow } from '@/src/components/activity-row';
 import { AppScreen } from '@/src/components/app-screen';
 import { StreakRocket } from '@/src/components/streak-rocket';

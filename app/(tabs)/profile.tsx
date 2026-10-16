@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { useQuery } from '@tanstack/react-query';
 import { getMe } from '@/src/services/api/today-api';

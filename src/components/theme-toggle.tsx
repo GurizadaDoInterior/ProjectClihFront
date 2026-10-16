@@ -1,4 +1,5 @@
-import { Pressable, Text } from 'react-native';
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
+import { Text } from 'react-native';
 import { useTheme } from '@/src/theme/theme-provider';
 export function ThemeToggle() {
   const { colors, mode, toggleTheme, storageError } = useTheme();

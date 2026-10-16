@@ -1,7 +1,8 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { sleepQualityColor } from '@/src/features/sleep/quality-colors';
-import { Animated, Easing, Platform, Pressable, Text, View } from 'react-native';
+import { Animated, Easing, Platform, Text, View } from 'react-native';
 import { useTheme } from '@/src/theme/theme-provider';
 export type SleepEntry = { date: string; sleptAt: string; wokeAt: string; quality: string; durationMinutes: number };
 export const dateKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -15,8 +16,8 @@ export function SleepHistory({ month, selected, entries, onMonth, onSelect, over
   if(previousMonth.current === monthKey) return;
   previousMonth.current = monthKey;
   monthFade.stopAnimation();
-  monthFade.setValue(0.65);
-  const animation = Animated.timing(monthFade, {toValue:1,duration:320,easing:Easing.out(Easing.cubic),useNativeDriver:true});
+  monthFade.setValue(0.9);
+  const animation = Animated.timing(monthFade, {toValue:1,duration:240,easing:Easing.out(Easing.cubic),useNativeDriver:true});
   animation.start();
   return () => animation.stop();
  },[monthKey,monthFade]);

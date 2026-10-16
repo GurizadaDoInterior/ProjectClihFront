@@ -1,5 +1,6 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Modal, Text, TextInput, View } from 'react-native';
 import { useTheme } from '@/src/theme/theme-provider';
 const names: Record<string, string> = {
  'America/Sao_Paulo': 'Brasília, São Paulo e Rio de Janeiro',

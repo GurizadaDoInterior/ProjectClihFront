@@ -1,5 +1,6 @@
+import { MotionPressable as Pressable } from './motion-pressable';
 import { useRef, useState, type ReactNode } from 'react';
-import { Animated, PanResponder, Pressable, Text, View } from 'react-native';
+import { Animated, PanResponder, Text, View } from 'react-native';
 import { useTheme } from '@/src/theme/theme-provider';
 
 export function SwipeToDelete({ children, disabled, onDelete }: { children: ReactNode; disabled?: boolean; onDelete: () => void }) {
@@ -16,6 +17,7 @@ export function SwipeToDelete({ children, disabled, onDelete }: { children: Reac
     Animated.spring(offset, { toValue: value, damping: 24, stiffness: 230, mass: 1, useNativeDriver: true }).start();
   };
   const responder = useRef(PanResponder.create({
+    onMoveShouldSetPanResponderCapture: (_event, gesture) => !disabledRef.current && Math.abs(gesture.dx) > 8 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5 && (gesture.dx < 0 || position.current < 0),
     onMoveShouldSetPanResponder: (_event, gesture) => !disabledRef.current && Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5 && (gesture.dx < 0 || position.current < 0),
     onPanResponderGrant: () => { offset.stopAnimation(); start.current = position.current; },
     onPanResponderMove: (_event, gesture) => offset.setValue(Math.max(-100, Math.min(0, start.current + gesture.dx))),

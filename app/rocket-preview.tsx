@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
+import { Text, View } from 'react-native';
 import { AppScreen } from '@/src/components/app-screen';
 import { StreakRocket } from '@/src/components/streak-rocket';
 import { flameStages, getFlameStage } from '@/src/features/streak/flame';

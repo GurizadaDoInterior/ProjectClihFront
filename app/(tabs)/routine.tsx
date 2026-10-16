@@ -1,9 +1,10 @@
+import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteHabit } from '@/src/services/api/today-api';
 import type { DailyActivity, TodaySummary } from '@/src/types/today';
 import { Link } from 'expo-router';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/src/components/app-screen';
 import { SectionHeader } from '@/src/components/section-header';
