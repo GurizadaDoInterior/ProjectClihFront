@@ -16,7 +16,7 @@ export default function EditProfileScreen() {
   const profile = useQuery({ queryKey: ['me'], queryFn: getMe });
   if (!profile.data)
     return (
-      <AppScreen>
+      <AppScreen backTo="/profile">
         <Pressable onPress={() => profile.refetch()}>
           <Text>
             {profile.error
@@ -78,7 +78,7 @@ function ProfileForm({ user }: { user: User }) {
     }
   }
   return (
-    <AppScreen>
+    <AppScreen backTo="/profile">
       <ProfilePhotoEditor user={user} />
       <Text style={styles.note}>
         Seu fuso define o dia usado na rotina e na sequência de atividades.

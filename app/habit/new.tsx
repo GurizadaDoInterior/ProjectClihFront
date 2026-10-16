@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createArea, createHabit, getAreas } from '@/src/services/api/today-api';
+import { createArea, createHabit, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
@@ -65,12 +65,15 @@ export default function NewHabitScreen() {
 
   async function submit(values: HabitForm) {
     setSubmitError('');
-    const selectedArea = areaId || areas.data?.[0]?.id;
-    if (!selectedArea || !days.length) {
-      setSubmitError('Selecione uma área e ao menos um dia.');
+    if (!days.length) {
+      setSubmitError('Selecione ao menos um dia da semana.');
       return;
     }
     try {
+      const selectedArea = await resolveHabitArea(areaId, newArea, areas.data ?? []);
+      setAreaId(selectedArea);
+      setNewArea('');
+      await queryClient.invalidateQueries({ queryKey: ['areas'] });
       await createHabit({
         areaId: selectedArea,
         name: values.name,
@@ -81,7 +84,9 @@ export default function NewHabitScreen() {
         scheduledDays: days,
       });
       await queryClient.invalidateQueries({ queryKey: ['today'] });
-      router.back();
+      void queryClient.invalidateQueries({ queryKey: ['calendar-activities'] });
+      void queryClient.invalidateQueries({ queryKey: ['day-history'] });
+      if (router.canGoBack()) router.back(); else router.replace('/routine');
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : 'Não foi possível criar a atividade.',
@@ -105,9 +110,10 @@ export default function NewHabitScreen() {
   }
 
   return (
-    <AppScreen>
+    <AppScreen backTo="/routine">
       <Text style={styles.intro}>Comece pequeno. Uma atividade clara é mais fácil de manter.</Text>
       <Text style={styles.label}>Área</Text>
+      {areas.data?.length === 0 ? <Text style={styles.intro}>Você ainda não tem áreas. Digite uma abaixo; ela será criada junto com a atividade.</Text> : null}
       {areas.isPending ? <Text>Carregando áreas...</Text> : null}
       {areas.isError ? (
         <Pressable onPress={() => areas.refetch()}>
@@ -124,7 +130,7 @@ export default function NewHabitScreen() {
               (areaId || areas.data[0]?.id) === area.id && styles.periodSelected,
             ]}
           >
-            <Text>{area.name}</Text>
+            <Text style={styles.periodText}>{area.name}</Text>
           </Pressable>
         ))}
       </View>
@@ -192,7 +198,7 @@ export default function NewHabitScreen() {
             onPress={() => setMeasurement(item)}
             style={[styles.period, measurement.value === item.value && styles.periodSelected]}
           >
-            <Text>{item.label}</Text>
+            <Text style={styles.periodText}>{item.label}</Text>
           </Pressable>
         ))}
       </View>
@@ -210,7 +216,7 @@ export default function NewHabitScreen() {
             }
             style={[styles.period, days.includes(day) && styles.periodSelected]}
           >
-            <Text>{dayLabels[index]}</Text>
+            <Text style={styles.periodText}>{dayLabels[index]}</Text>
           </Pressable>
         ))}
       </View>
@@ -240,9 +246,10 @@ export default function NewHabitScreen() {
         </Text>
       ) : null}
       <Pressable
-        disabled={isSubmitting || creatingArea || !areas.data?.length}
-        onPress={handleSubmit(submit)}
-        style={({ pressed }) => [styles.submit, pressed && styles.pressed]}
+        accessibilityRole="button"
+        disabled={isSubmitting || creatingArea || areas.isPending || areas.isError}
+        onPress={handleSubmit(submit, () => setSubmitError('Confira o nome e a quantidade da meta antes de criar a atividade.'))}
+        style={({ pressed }) => [styles.submit, { opacity: isSubmitting || creatingArea || areas.isPending || areas.isError ? 0.55 : pressed ? 0.9 : 1 }]}
       >
         <Text style={styles.submitText}>{isSubmitting ? 'Criando...' : 'Criar atividade'}</Text>
       </Pressable>

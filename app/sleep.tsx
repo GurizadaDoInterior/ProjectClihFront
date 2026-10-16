@@ -71,10 +71,8 @@ export default function SleepScreen() {
     } catch (error) { setSaveError(error instanceof Error ? error.message : 'Não foi possível salvar. Tente novamente.'); }
   }
   return (
-    <AppScreen>
-      <Pressable accessibilityRole="button" accessibilityLabel="Voltar para o aplicativo" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/'); }} style={({ pressed }) => ({ alignSelf: 'flex-start', paddingVertical: 12, paddingRight: 20, marginBottom: 8, opacity: pressed ? 0.75 : 1 })}>
-        <Text style={{ color: colors.ink, fontSize: 16, fontWeight: '700' }}>‹ Voltar</Text>
-      </Pressable>
+    <AppScreen backTo="/">
+
       <Text style={styles.intro}>Registre seu descanso e compare suas noites. Os registros ficam salvos na sua conta.</Text>
       {saveError ? <Text accessibilityRole="alert" style={styles.error}>{saveError}</Text> : null}
 

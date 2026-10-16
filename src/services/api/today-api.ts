@@ -89,3 +89,15 @@ export async function createHabit(values: CreateHabit) {
 
 export const uploadProfilePhoto = (image: string) => request<User>('/me/avatar', { method: 'PUT', body: JSON.stringify({ image }) });
 export const removeProfilePhoto = () => request<User>('/me/avatar', { method: 'DELETE' });
+
+export async function resolveHabitArea(selectedId: string, newName: string, available: Area[]) {
+  const name = newName.trim();
+  if (name) {
+    const existing = available.find(area => area.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+    if (existing) return existing.id;
+    return (await createArea(name)).id;
+  }
+  const id = selectedId || available[0]?.id;
+  if (!id) throw new Error('Digite o nome de uma área, como Saúde ou Estudos, para criar sua primeira atividade.');
+  return id;
+}

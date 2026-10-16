@@ -234,3 +234,29 @@ test('profile photo upload and removal use authenticated account endpoints', asy
   assert.deepEqual(JSON.parse(calls[0].init.body), { image: 'data:image/jpeg;base64,test' });
   assert.equal(calls[1].init.method, 'DELETE');
 });
+
+test('first activity creates its typed area when the account has no areas', async () => {
+  const { resolveHabitArea } = require('../src/services/api/today-api.ts');
+  const calls=[];
+  global.fetch=async (url, options) => {
+    calls.push({url,body:JSON.parse(options.body)});
+    return Response.json({id:'new-area',name:'Saúde'});
+  };
+  assert.equal(await resolveHabitArea('', ' Saúde ', []),'new-area');
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].body.name,'Saúde');
+});
+
+test('area selection reuses existing areas without duplicate requests', async () => {
+  const { resolveHabitArea } = require('../src/services/api/today-api.ts');
+  global.fetch=async ()=>{throw new Error('Unexpected request');};
+  assert.equal(await resolveHabitArea('', ' música ', [area]),'a');
+  assert.equal(await resolveHabitArea('selected', '', [area]),'selected');
+  assert.equal(await resolveHabitArea('', '', [area]),'a');
+});
+
+test('missing first area returns actionable feedback without sending a request', async () => {
+  const { resolveHabitArea } = require('../src/services/api/today-api.ts');
+  global.fetch=async ()=>{throw new Error('Unexpected request');};
+  await assert.rejects(resolveHabitArea('', '', []),/Digite o nome de uma área/);
+});
