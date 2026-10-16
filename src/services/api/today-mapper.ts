@@ -34,6 +34,7 @@ export function mapToday(response: TodayResponse): TodaySummary {
       areaName: habit.area.name,
       areaColor: habit.area.color,
       period: habit.dayPeriod,
+      periods: habit.dayPeriods?.length ? habit.dayPeriods : [habit.dayPeriod],
       completed: habit.completed,
       completionId: habit.completionId,
       xpAwarded: habit.xpAwarded ?? 0,

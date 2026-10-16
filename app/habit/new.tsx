@@ -20,7 +20,7 @@ const habitSchema = z.object({
     .trim()
     .regex(/^\d{1,10}([.,]\d{1,2})?$/, 'Informe um número com até 2 casas decimais')
     .refine((value) => Number(value.replace(',', '.')) > 0, 'A meta deve ser maior que zero'),
-  period: z.enum(['Manhã', 'Tarde', 'Noite', 'Sem horário']),
+
 });
 
 type HabitForm = z.infer<typeof habitSchema>;
@@ -32,6 +32,7 @@ const periodValues: Record<string, DayPeriod> = {
   'Sem horário': 'ANYTIME',
 };
 const measurements: { label: string; value: MeasurementType; unit: string }[] = [
+  { label: 'Horas', value: 'HOURS', unit: 'horas' },
   { label: 'Minutos', value: 'MINUTES', unit: 'minutos' },
   { label: 'Páginas', value: 'PAGES', unit: 'páginas' },
   { label: 'Vezes', value: 'COUNT', unit: 'vezes' },
@@ -52,6 +53,7 @@ export default function NewHabitScreen() {
   const [newArea, setNewArea] = useState('');
   const [measurement, setMeasurement] = useState(measurements[0]);
   const [days, setDays] = useState(weekDays);
+  const [selectedPeriods, setSelectedPeriods] = useState<DayPeriod[]>(['MORNING']);
   const [submitError, setSubmitError] = useState('');
   const [creatingArea, setCreatingArea] = useState(false);
   const {
@@ -60,11 +62,12 @@ export default function NewHabitScreen() {
     formState: { errors, isSubmitting },
   } = useForm<HabitForm>({
     resolver: zodResolver(habitSchema),
-    defaultValues: { name: '', target: '1', period: 'Manhã' },
+    defaultValues: { name: '', target: '1' },
   });
 
   async function submit(values: HabitForm) {
     setSubmitError('');
+    if (!selectedPeriods.length) { setSubmitError('Selecione ao menos um turno.'); return; }
     if (!days.length) {
       setSubmitError('Selecione ao menos um dia da semana.');
       return;
@@ -80,7 +83,8 @@ export default function NewHabitScreen() {
         targetValue: measurement.value === 'BOOLEAN' ? 1 : Number(values.target.replace(',', '.')),
         measurementType: measurement.value,
         unit: measurement.unit,
-        dayPeriod: periodValues[values.period],
+        dayPeriod: selectedPeriods[0],
+        dayPeriods: selectedPeriods,
         scheduledDays: days,
       });
       await queryClient.invalidateQueries({ queryKey: ['today'] });
@@ -222,25 +226,16 @@ export default function NewHabitScreen() {
         ))}
       </View>
       <Text style={styles.label}>Período</Text>
-      <Controller
-        control={control}
-        name="period"
-        render={({ field: { onChange, value } }) => (
-          <View style={styles.periods}>
-            {periods.map((period) => (
-              <Pressable
-                key={period}
-                onPress={() => onChange(period)}
-                style={[styles.period, value === period && styles.periodSelected]}
-              >
-                <Text style={[styles.periodText, value === period && styles.periodTextSelected]}>
-                  {period}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-      />
+      <Text style={styles.intro}>Escolha um ou mais turnos. A atividade é concluída uma única vez por dia.</Text>
+      <View style={styles.periods}>
+        {periods.map(label => {
+          const period = periodValues[label];
+          const checked = selectedPeriods.includes(period);
+          return <Pressable key={period} accessibilityRole="checkbox" accessibilityState={{checked}} onPress={() => setSelectedPeriods(current => period === 'ANYTIME' ? ['ANYTIME'] : current.includes(period) ? current.filter(item => item !== period) : [...current.filter(item => item !== 'ANYTIME'), period])} style={[styles.period,checked && styles.periodSelected]}>
+            <Text style={[styles.periodText,checked && styles.periodTextSelected]}>{label}</Text>
+          </Pressable>;
+        })}
+      </View>
       {submitError ? (
         <Text accessibilityRole="alert" style={styles.error}>
           {submitError}

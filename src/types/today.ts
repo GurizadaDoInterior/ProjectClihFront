@@ -11,6 +11,7 @@ export type DailyActivity = {
   areaName?: string;
   areaColor?: string;
   period?: import('../services/api/contracts').DayPeriod;
+  periods?: import('../services/api/contracts').DayPeriod[];
 };
 
 export type WeekDay = {

@@ -261,3 +261,27 @@ test('missing first area returns actionable feedback without sending a request',
   global.fetch=async ()=>{throw new Error('Unexpected request');};
   await assert.rejects(resolveHabitArea('', '', []),/Digite o nome de uma área/);
 });
+
+test('multiple periods remain one activity with a shared completion and hours target', () => {
+  const response={...today, habits:[{...today.habits[0], measurementType:'HOURS', targetValue:1.5, unit:'horas', dayPeriods:['MORNING','EVENING'],completed:true,completionId:'shared',xpAwarded:10}]};
+  const result=mapToday(response);
+  assert.equal(result.activities.length,1);
+  assert.deepEqual(result.activities[0].periods,['MORNING','EVENING']);
+  assert.equal(result.activities[0].completionId,'shared');
+  assert.equal(result.activities[0].target,'1.5 horas');
+  assert.deepEqual(mapToday(today).activities[0].periods,[today.habits[0].dayPeriod]);
+});
+
+test('deleting an activity calls the authenticated archive endpoint', async () => {
+  const {deleteHabit}=require('../src/services/api/today-api.ts');
+  let calls=0;
+  global.fetch=async (url,options)=>{calls++;assert.equal(url,apiUrl+'/habits/h1');assert.equal(options.method,'DELETE');return new Response(null,{status:204});};
+  await deleteHabit('h1');assert.equal(calls,1);
+});
+
+test('hours and selected periods are sent together for one habit',async()=>{
+  let calls=0;
+  global.fetch=async (url,options)=>{calls++;const body=JSON.parse(options.body);assert.equal(body.measurementType,'HOURS');assert.equal(body.targetValue,1.5);assert.deepEqual(body.dayPeriods,['MORNING','EVENING']);return Response.json({id:'single'});};
+  await createHabit({areaId:'a',name:'Estudar',measurementType:'HOURS',targetValue:1.5,unit:'horas',dayPeriod:'MORNING',dayPeriods:['MORNING','EVENING'],scheduledDays:['MONDAY']});
+  assert.equal(calls,1);
+});

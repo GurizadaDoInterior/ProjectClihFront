@@ -80,6 +80,7 @@ export async function createHabit(values: CreateHabit) {
       target: `${values.targetValue} ${values.unit ?? ''}`,
       area: 'study',
       period: values.dayPeriod,
+      periods: values.dayPeriods ?? [values.dayPeriod],
       completed: false,
     });
     return;
@@ -100,4 +101,9 @@ export async function resolveHabitArea(selectedId: string, newName: string, avai
   const id = selectedId || available[0]?.id;
   if (!id) throw new Error('Digite o nome de uma área, como Saúde ou Estudos, para criar sua primeira atividade.');
   return id;
+}
+
+export async function deleteHabit(habitId: string) {
+  if (isDemo) { demo = { ...demo, activities: demo.activities.filter(item => item.id !== habitId) }; return; }
+  await request(`/habits/${encodeURIComponent(habitId)}`, { method: 'DELETE' });
 }

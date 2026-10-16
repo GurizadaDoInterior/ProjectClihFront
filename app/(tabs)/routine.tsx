@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteHabit } from '@/src/services/api/today-api';
+import type { DailyActivity, TodaySummary } from '@/src/types/today';
 import { Link } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AppScreen } from '@/src/components/app-screen';
 import { SectionHeader } from '@/src/components/section-header';
@@ -12,6 +16,16 @@ export default function RoutineScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { data, error, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
+  const queryClient = useQueryClient();
+  const [deleting, setDeleting] = useState<DailyActivity | null>(null);
+  const deletion = useMutation({
+    mutationFn: deleteHabit,
+    onSuccess: (_result, deletedId) => {
+      queryClient.setQueryData<TodaySummary>(['today'], current => current ? { ...current, activities: current.activities.filter(activity => activity.id !== deletedId) } : current);
+      setDeleting(null);
+      for (const key of ['today', 'day-history', 'calendar-activities']) void queryClient.invalidateQueries({ queryKey: [key] });
+    },
+  });
   const groups = [
     ['MORNING', 'Manhã'],
     ['AFTERNOON', 'Tarde'],
@@ -47,16 +61,32 @@ export default function RoutineScreen() {
       {data && !data.activities.length ? (
         <Text style={styles.subtitle}>Nenhuma atividade para hoje. Use + para criar uma.</Text>
       ) : null}
-      {groups.filter(([key]) => data?.activities.some(item => (item.period ?? 'ANYTIME') === key)).map(([key, title]) => (
+      {groups.filter(([key]) => data?.activities.some(item => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))).map(([key, title]) => (
         <View key={key} style={styles.period}>
           <SectionHeader>{title}</SectionHeader>
           {data?.activities
-            .filter((item) => (item.period ?? 'ANYTIME') === key)
+            .filter((item) => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))
             .map((item) => (
-              <ActivityRow key={item.id} activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
+              <View key={item.id}>
+              <ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
+              <Pressable accessibilityRole="button" accessibilityLabel={'Excluir atividade '+item.title} disabled={isToggling || deletion.isPending} onPress={() => { deletion.reset(); setDeleting(item); }} style={({pressed}) => ({alignSelf:'flex-end',paddingVertical:10,paddingLeft:18,opacity:pressed?0.7:1})}><Text style={{color:colors.danger,fontSize:12,fontWeight:'600'}}>Excluir atividade</Text></Pressable>
+              </View>
             ))}
         </View>
       ))}
+      <Modal visible={deleting !== null} transparent animationType="fade" onRequestClose={() => {if(!deletion.isPending)setDeleting(null);}}>
+        <View style={{flex:1,backgroundColor:'#00000080',alignItems:'center',justifyContent:'center',padding:24}}>
+          <View accessibilityViewIsModal style={{width:'100%',maxWidth:420,padding:24,borderRadius:16,backgroundColor:colors.surface,gap:16}}>
+            <Text style={{color:colors.ink,fontSize:23,fontWeight:'700'}}>Excluir atividade?</Text>
+            <Text style={{color:colors.muted,lineHeight:22}}>“{deleting?.title}” será removida da sua rotina.</Text>
+            {deletion.error ? <Text accessibilityRole="alert" style={{color:colors.danger}}>{deletion.error.message}</Text> : null}
+            <View style={{flexDirection:'row',gap:12}}>
+              <Pressable disabled={deletion.isPending} onPress={() => setDeleting(null)} style={{flex:1,padding:14,alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:8}}><Text style={{color:colors.ink,fontWeight:'700'}}>Cancelar</Text></Pressable>
+              <Pressable disabled={deletion.isPending} onPress={() => {if(deleting)deletion.mutate(deleting.id);}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{deletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </AppScreen>
   );
 }

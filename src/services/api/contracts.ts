@@ -1,5 +1,5 @@
 export type DayPeriod = 'MORNING' | 'AFTERNOON' | 'EVENING' | 'ANYTIME';
-export type MeasurementType = 'BOOLEAN' | 'COUNT' | 'MINUTES' | 'PAGES' | 'DISTANCE_KM' | 'MONEY';
+export type MeasurementType = 'BOOLEAN' | 'COUNT' | 'MINUTES' | 'HOURS' | 'PAGES' | 'DISTANCE_KM' | 'MONEY';
 export type Area = {
   id: string;
   name: string;
@@ -49,6 +49,7 @@ export type TodayResponse = {
     targetValue: number;
     unit: string | null;
     dayPeriod: DayPeriod;
+    dayPeriods?: DayPeriod[];
     preferredTime: string | null;
     completed: boolean;
     completionId?: string | null;
@@ -62,5 +63,6 @@ export type CreateHabit = {
   targetValue: number;
   unit?: string;
   dayPeriod: DayPeriod;
+  dayPeriods?: DayPeriod[];
   scheduledDays: string[];
 };
