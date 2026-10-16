@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createArea, createHabit, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteArea, createArea, createHabit, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
@@ -56,6 +56,17 @@ export default function NewHabitScreen() {
   const [selectedPeriods, setSelectedPeriods] = useState<DayPeriod[]>(['MORNING']);
   const [submitError, setSubmitError] = useState('');
   const [creatingArea, setCreatingArea] = useState(false);
+  const [deletingArea, setDeletingArea] = useState<{ id: string; name: string } | null>(null);
+  const areaDeletion = useMutation({
+    mutationFn: deleteArea,
+    onSuccess: (_result, id) => {
+      if (areaId === id) setAreaId('');
+      queryClient.setQueryData(['areas'], (current: Awaited<ReturnType<typeof getAreas>> | undefined) => current?.filter(area => area.id !== id));
+      setDeletingArea(null);
+      void queryClient.invalidateQueries({ queryKey: ['areas'] });
+      void queryClient.invalidateQueries({ queryKey: ['today'] });
+    },
+  });
   const {
     control,
     handleSubmit,
@@ -115,7 +126,7 @@ export default function NewHabitScreen() {
 
   return (
     <AppScreen backTo="/routine">
-      <Text style={styles.intro}>Comece pequeno. Uma atividade clara é mais fácil de manter.</Text>
+      <Text accessibilityRole="header" style={{color:colors.ink,fontSize:28,fontWeight:'700',marginTop:16}}>Nova atividade</Text><Text style={styles.intro}>Comece pequeno. Uma atividade clara é mais fácil de manter.</Text>
       <Text style={styles.label}>Área</Text>
       {areas.data?.length === 0 ? <Text style={styles.intro}>Você ainda não tem áreas. Digite uma abaixo; ela será criada junto com a atividade.</Text> : null}
       {areas.isPending ? <Text style={styles.intro}>Carregando áreas...</Text> : null}
@@ -125,9 +136,9 @@ export default function NewHabitScreen() {
         </Pressable>
       ) : null}
       <View style={styles.periods}>
-        {areas.data?.map((area) => (
+        {areas.data?.map((area) => (<View key={area.id}>
           <Pressable
-            key={area.id}
+            accessibilityRole="button"
             onPress={() => setAreaId(area.id)}
             style={[
               styles.period,
@@ -136,7 +147,8 @@ export default function NewHabitScreen() {
           >
             <Text style={styles.periodText}>{area.name}</Text>
           </Pressable>
-        ))}
+          {!isDemo ? <Pressable accessibilityRole="button" accessibilityLabel={'Excluir área '+area.name} disabled={isSubmitting || creatingArea || areaDeletion.isPending} onPress={() => {areaDeletion.reset();setDeletingArea(area);}} style={{paddingVertical:10,alignItems:'center'}}><Text style={{color:colors.danger,fontSize:12}}>Excluir área</Text></Pressable> : null}
+        </View>))}
       </View>
       {!isDemo ? (
         <View style={styles.field}>
@@ -249,6 +261,19 @@ export default function NewHabitScreen() {
       >
         <Text style={styles.submitText}>{isSubmitting ? 'Criando...' : 'Criar atividade'}</Text>
       </Pressable>
+      <Modal visible={deletingArea !== null} transparent animationType="fade" onRequestClose={() => {if(!areaDeletion.isPending)setDeletingArea(null);}}>
+        <View style={{flex:1,backgroundColor:'#00000080',alignItems:'center',justifyContent:'center',padding:24}}>
+          <View accessibilityViewIsModal style={{width:'100%',maxWidth:420,padding:24,borderRadius:16,backgroundColor:colors.surface,gap:16}}>
+            <Text style={{color:colors.ink,fontSize:23,fontWeight:'700'}}>Excluir área?</Text>
+            <Text style={{color:colors.muted,lineHeight:22}}>Excluir “{deletingArea?.name}”? Áreas com atividades vinculadas só podem ser excluídas depois de remover ou mover suas atividades.</Text>
+            {areaDeletion.error ? <Text accessibilityRole="alert" style={{color:colors.danger}}>{areaDeletion.error.message}</Text> : null}
+            <View style={{flexDirection:'row',gap:12}}>
+              <Pressable disabled={areaDeletion.isPending} onPress={() => setDeletingArea(null)} style={{flex:1,padding:14,alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:8}}><Text style={{color:colors.ink,fontWeight:'700'}}>Cancelar</Text></Pressable>
+              <Pressable disabled={areaDeletion.isPending} onPress={() => {if(deletingArea)areaDeletion.mutate(deletingArea.id);}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{areaDeletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </AppScreen>
   );
 }

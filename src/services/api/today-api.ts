@@ -107,3 +107,6 @@ export async function deleteHabit(habitId: string) {
   if (isDemo) { demo = { ...demo, activities: demo.activities.filter(item => item.id !== habitId) }; return; }
   await request(`/habits/${encodeURIComponent(habitId)}`, { method: 'DELETE' });
 }
+export async function deleteArea(areaId: string) {
+  await request(`/areas/${encodeURIComponent(areaId)}`, { method: 'DELETE' });
+}

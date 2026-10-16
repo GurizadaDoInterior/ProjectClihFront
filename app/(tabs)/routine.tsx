@@ -10,6 +10,7 @@ import { SectionHeader } from '@/src/components/section-header';
 import { radius } from '@/src/theme/tokens';
 import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
+import { SwipeToDelete } from '@/src/components/swipe-to-delete';
 import { ActivityRow } from '@/src/components/activity-row';
 
 export default function RoutineScreen() {
@@ -68,7 +69,7 @@ export default function RoutineScreen() {
             .filter((item) => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))
             .map((item) => (
               <View key={item.id}>
-              <ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} />
+              <SwipeToDelete disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling} onToggle={() => toggleActivity(item.id)} /></SwipeToDelete>
               <Pressable accessibilityRole="button" accessibilityLabel={'Excluir atividade '+item.title} disabled={isToggling || deletion.isPending} onPress={() => { deletion.reset(); setDeleting(item); }} style={({pressed}) => ({alignSelf:'flex-end',paddingVertical:10,paddingLeft:18,opacity:pressed?0.7:1})}><Text style={{color:colors.danger,fontSize:12,fontWeight:'600'}}>Excluir atividade</Text></Pressable>
               </View>
             ))}

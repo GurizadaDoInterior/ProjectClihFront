@@ -285,3 +285,19 @@ test('hours and selected periods are sent together for one habit',async()=>{
   await createHabit({areaId:'a',name:'Estudar',measurementType:'HOURS',targetValue:1.5,unit:'horas',dayPeriod:'MORNING',dayPeriods:['MORNING','EVENING'],scheduledDays:['MONDAY']});
   assert.equal(calls,1);
 });
+
+test('area deletion accepts an empty response and encodes the identifier', async () => {
+  const { deleteArea } = require('../src/services/api/today-api.ts');
+  global.fetch = async (url, options) => {
+    assert.equal(url, apiUrl + '/areas/area%2Fid');
+    assert.equal(options.method, 'DELETE');
+    return new Response(null, {status:204});
+  };
+  await deleteArea('area/id');
+});
+
+test('area deletion preserves server feedback for linked activities', async () => {
+  const { deleteArea } = require('../src/services/api/today-api.ts');
+  global.fetch = async () => Response.json({message:'Remova as atividades desta área primeiro.'}, {status:409});
+  await assert.rejects(deleteArea('linked'), /Remova as atividades/);
+});
