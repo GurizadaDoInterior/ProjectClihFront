@@ -14,7 +14,7 @@ import { isDemo } from '@/src/services/api/client';
 export default function TodayScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const rocketSize = useWindowDimensions().width < 360 ? 76 : 84;
+  const rocketSize = useWindowDimensions().width < 360 ? 92 : 108;
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
   if (isError || !data) return <AppScreen>
@@ -88,8 +88,8 @@ const getStyles = (colors: Palette) => themedStyles({
   scoreFill: { height: '100%', backgroundColor: '#17120C' },
   metrics: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 18, marginBottom: 4 },
   metric: { flex: 1, minWidth: 0, paddingHorizontal: 8 },
-  streakMetric: { flex: 1.35, paddingHorizontal: 4 },
-  metricValue: { height: 84, justifyContent: 'center', alignItems: 'flex-start' },
+  streakMetric: { flex: 1.8, paddingHorizontal: 4 },
+  metricValue: { height: 108, justifyContent: 'center', alignItems: 'flex-start' },
   metricMiddle: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border },
   metricNumber: { color: colors.ink, fontSize: 29, fontWeight: '700' },
   metricUnit: { color: colors.muted, fontSize: 10, fontWeight: '700' },
