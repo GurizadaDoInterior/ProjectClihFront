@@ -51,8 +51,8 @@ export default function TodayScreen() {
 
     <View style={styles.metrics}>
       <View style={[styles.metric, styles.streakMetric]}><View style={[styles.metricValue, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 2 }]}><Link href="/rocket-preview" asChild><Pressable accessibilityRole="button" accessibilityLabel={`Ver evolução do foguete. Fase atual: ${getFlameStage(data.streakDays).name}`} style={({pressed}) => ({opacity:pressed ? 0.7 : 1})}><StreakRocket days={data.streakDays} size={rocketSize} /></Pressable></Link><Text style={[styles.metricNumber, { color: getFlameStage(data.streakDays).color }]}>{data.streakDays}</Text></View><Text style={styles.metricLabel}>DIAS EM SEQUÊNCIA</Text><Link href="/rocket-preview" style={{color:colors.muted,fontSize:10,paddingTop:5}}>Ver evolução ↗</Link></View>
-      <View style={[styles.metric, styles.metricMiddle]}><View style={styles.metricValue}><Text style={styles.metricNumber}>{data.level}<Text style={styles.metricUnit}> NÍVEL</Text></Text></View><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
-      <View style={styles.metric}><View style={styles.metricValue}><Text style={styles.metricNumber}>{data.xp.toLocaleString('pt-BR')}</Text></View><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
+      <View style={[styles.metric, styles.metricMiddle]}><View style={styles.metricValue}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={[styles.metricNumber, styles.metricNumberLarge]}>{data.level}<Text style={styles.metricUnit}> NÍVEL</Text></Text></View><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
+      <View style={[styles.metric, styles.xpMetric]}><View style={styles.metricValue}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[styles.metricNumber, styles.metricNumberLarge]}>{data.xp.toLocaleString('pt-BR')}</Text></View><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
     </View>
     <WeekStrip days={data.week} />
 
@@ -88,13 +88,15 @@ const getStyles = (colors: Palette) => themedStyles({
   scoreFill: { height: '100%', backgroundColor: '#17120C' },
   metrics: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 18, marginBottom: 4 },
   metric: { flex: 1, minWidth: 0, paddingHorizontal: 8 },
-  streakMetric: { flex: 1.8, paddingHorizontal: 4 },
+  streakMetric: { flex: 1.65, paddingHorizontal: 0 },
   metricValue: { height: 108, justifyContent: 'center', alignItems: 'flex-start' },
   metricMiddle: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border },
   metricNumber: { color: colors.ink, fontSize: 29, fontWeight: '700' },
-  metricUnit: { color: colors.muted, fontSize: 10, fontWeight: '700' },
+  metricNumberLarge: { fontSize: 40 },
+  xpMetric: { flex: 1.2 },
+  metricUnit: { color: colors.muted, fontSize: 12, fontWeight: '700' },
   metricLabel: { color: colors.muted, fontSize: 9, fontWeight: '700', letterSpacing: 0.6, marginTop: 3 },
-  levelTrack: { height: 2, backgroundColor: colors.border, marginTop: 8, width: '85%' },
+  levelTrack: { height: 4, backgroundColor: colors.border, marginTop: 8, width: '90%' },
   levelFill: { height: '100%', backgroundColor: colors.orange },
   sectionLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: colors.ink, paddingBottom: 12, marginTop: 18 },
   section: { fontSize: 24, fontWeight: '700', color: colors.ink, letterSpacing: 0.5 },
