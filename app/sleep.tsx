@@ -156,7 +156,7 @@ export default function SleepScreen() {
         onPressOut={() => animateButton(1)}
         onPress={handleSubmit(submit)}
         style={[styles.submit, { backgroundColor: saved ? '#15803D' : colors.primary }, Platform.OS === 'web' && ({ transition: 'background-color 300ms ease' } as unknown as import('react-native').ViewStyle)]}>
-        <Text accessibilityLiveRegion="polite" style={styles.submitText}>{isSubmitting ? 'Salvando...' : saved ? '✓ Registro salvo' : 'Salvar registro'}</Text>
+        <Text accessibilityLiveRegion="polite" style={[styles.submitText, saved && { color: '#FFFFFF' }]}>{isSubmitting ? 'Salvando...' : saved ? '✓ Registro salvo' : 'Salvar registro'}</Text>
       </Pressable>
       </Animated.View>
       {history.isPending ? <Text style={styles.intro}>Carregando histórico...</Text> : history.isError ? <Pressable onPress={() => history.refetch()}><Text style={styles.error}>Não foi possível carregar o histórico. Toque para tentar novamente.</Text></Pressable> : <SleepHistory month={month} selected={selected} entries={history.data ?? []} onMonth={date => { setMonth(date); setSelected(dateKey(date)); }} onSelect={setSelected} />}

@@ -114,7 +114,7 @@ export default function NewHabitScreen() {
       <Text style={styles.intro}>Comece pequeno. Uma atividade clara é mais fácil de manter.</Text>
       <Text style={styles.label}>Área</Text>
       {areas.data?.length === 0 ? <Text style={styles.intro}>Você ainda não tem áreas. Digite uma abaixo; ela será criada junto com a atividade.</Text> : null}
-      {areas.isPending ? <Text>Carregando áreas...</Text> : null}
+      {areas.isPending ? <Text style={styles.intro}>Carregando áreas...</Text> : null}
       {areas.isError ? (
         <Pressable onPress={() => areas.refetch()}>
           <Text style={styles.error}>Falha ao carregar áreas. Tentar novamente</Text>
@@ -140,6 +140,7 @@ export default function NewHabitScreen() {
             accessibilityLabel="Nome da nova área"
             editable={!areas.isPending}
             placeholder="Nova área (ex.: Saúde)"
+            placeholderTextColor={colors.muted}
             maxLength={60}
             value={newArea}
             onChangeText={setNewArea}
@@ -164,7 +165,7 @@ export default function NewHabitScreen() {
             <TextInput
               onChangeText={onChange}
               placeholder="Ex.: Estudar programação"
-              placeholderTextColor="#96A3B8"
+              placeholderTextColor={colors.muted}
               value={value}
               style={styles.input}
             />
@@ -182,7 +183,7 @@ export default function NewHabitScreen() {
               onChangeText={onChange}
               keyboardType="decimal-pad"
               placeholder="Ex.: 30"
-              placeholderTextColor="#96A3B8"
+              placeholderTextColor={colors.muted}
               value={value}
               style={styles.input}
             />

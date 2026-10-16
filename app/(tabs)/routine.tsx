@@ -34,7 +34,7 @@ export default function RoutineScreen() {
 
       {!data ? (
         <Pressable onPress={() => refetch()}>
-          <Text>
+          <Text style={{ color: colors.muted }}>
             {error ? `${error.message} Toque para tentar novamente.` : 'Carregando rotina...'}
           </Text>
         </Pressable>

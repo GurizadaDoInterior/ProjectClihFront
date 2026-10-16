@@ -18,7 +18,7 @@ export default function EditProfileScreen() {
     return (
       <AppScreen backTo="/profile">
         <Pressable onPress={() => profile.refetch()}>
-          <Text>
+          <Text style={{ color: colors.muted }}>
             {profile.error
               ? `${profile.error.message} Toque para tentar novamente.`
               : 'Carregando perfil...'}
@@ -84,7 +84,7 @@ function ProfileForm({ user }: { user: User }) {
         Seu fuso define o dia usado na rotina e na sequência de atividades.
       </Text>
       <Text style={styles.label}>Nome</Text>
-      <TextInput
+      <TextInput placeholderTextColor={colors.muted}
         accessibilityLabel="Nome do perfil"
         style={styles.input}
         value={name}
@@ -92,7 +92,7 @@ function ProfileForm({ user }: { user: User }) {
         maxLength={80}
       />
       <Text style={styles.label}>Usuário (opcional)</Text>
-      <TextInput
+      <TextInput placeholderTextColor={colors.muted}
         accessibilityLabel="Nome de usuário"
         style={styles.input}
         value={username}

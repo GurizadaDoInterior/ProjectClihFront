@@ -20,7 +20,7 @@ export default function ProfileScreen() {
     return (
       <AppScreen>
         <Pressable onPress={() => refetch()}>
-          <Text>
+          <Text style={{ color: colors.muted }}>
             {error ? `${error.message} Toque para tentar novamente.` : 'Carregando perfil...'}
           </Text>
         </Pressable>

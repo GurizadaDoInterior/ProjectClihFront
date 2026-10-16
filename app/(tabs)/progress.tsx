@@ -69,7 +69,7 @@ export default function ProgressScreen() {
       <Text style={{color:colors.ink,fontWeight:'700',fontSize:18}}>ATIVIDADES • {selected.split('-').reverse().join('/')}</Text>
       {day.isPending ? <Text style={styles.sub}>Carregando atividades do dia...</Text> : day.isError ? <Pressable onPress={() => day.refetch()}><Text style={styles.sub}>Não foi possível carregar. Toque para tentar novamente.</Text></Pressable> : <>
         <Text style={styles.sub}>{day.data?.activities.filter(item => item.completed).length ?? 0} de {day.data?.activities.length ?? 0} atividades concluídas</Text>
-        {day.data?.activities.map(item => <View key={item.id} style={{flexDirection:'row',gap:10,alignItems:'center'}}><Text style={{color:item.completed?'#15803D':colors.muted}}>{item.completed?'✓':'○'}</Text><View style={{flex:1}}><Text style={{color:colors.ink}}>{item.title}</Text><Text style={styles.sub}>{item.target}</Text></View><Text style={{color:colors.muted,fontSize:11}}>{item.completed?'FEITO':'PENDENTE'}</Text></View>)}
+        {day.data?.activities.map(item => <View key={item.id} style={{flexDirection:'row',gap:10,alignItems:'center'}}><Text style={{color:item.completed?colors.success:colors.muted}}>{item.completed?'✓':'○'}</Text><View style={{flex:1}}><Text style={{color:colors.ink}}>{item.title}</Text><Text style={styles.sub}>{item.target}</Text></View><Text style={{color:colors.muted,fontSize:11}}>{item.completed?'FEITO':'PENDENTE'}</Text></View>)}
         {!day.data?.activities.length ? <Text style={styles.sub}>Nenhuma atividade programada para esse dia.</Text> : null}
       </>}
       <Link href="/sleep" style={{color:colors.primary,fontWeight:'700',paddingVertical:10}}>REGISTRAR SONO →</Link>

@@ -3,7 +3,7 @@ export const lightColors = {
   ink: '#191A1B', muted: '#62635F', border: '#D3D1C8',
   primary: '#26364A', teal: '#26364A', tealSoft: '#E1E5E9',
   orange: '#B6471D', orangeSoft: '#F4E2D5', violet: '#645A6B', violetSoft: '#E9E4EB',
-  blueSoft: '#E1E5E9', danger: '#BC3831', onAccent: '#FFFFFF', hero: '#1C2430', heroMuted: '#C9CFD7',
+  blueSoft: '#E1E5E9', success: '#15803D', danger: '#BC3831', onAccent: '#FFFFFF', hero: '#1C2430', heroMuted: '#C9CFD7',
 } as const;
 export type Palette = { [K in keyof typeof lightColors]: string };
 export const darkColors: Palette = {
@@ -11,7 +11,7 @@ export const darkColors: Palette = {
   ink: '#F5F3EC', muted: '#B1AEA5', border: '#3C3A34',
   primary: '#F0AD45', teal: '#F0AD45', tealSoft: '#332B20',
   orange: '#F0AD45', orangeSoft: '#332B20', violet: '#B8ACBD', violetSoft: '#302B32',
-  blueSoft: '#2C2D2E', danger: '#F39483', onAccent: '#191610', hero: '#23221E', heroMuted: '#D8CEB9',
+  blueSoft: '#2C2D2E', success: '#6DDC98', danger: '#F39483', onAccent: '#191610', hero: '#23221E', heroMuted: '#D8CEB9',
 };
 export const colors = lightColors;
 
