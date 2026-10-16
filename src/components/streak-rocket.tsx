@@ -14,8 +14,8 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
   return <View accessible accessibilityRole="image" accessibilityLabel={`Foguete: ${stage.name}, ${days} dias em sequência`}>
     <Svg width={size} height={size} viewBox="-10 -6 72 76">
       <G transform="rotate(-42 22 30)">
-        <Path d={`M17 36 C13 41 15 46 18.5 48 Q20 55 22 ${tail} Q26 55 27 48 C30 44 31 40 27 36 Z`} fill={stage.color} />
-        <Path d={`M20 37 Q17.5 44 22 ${tail - 6} Q26.5 44 24 37 Z`} fill={stage.core} />
+        <Path d={`M17 36 C14 42 16 48 19 53 Q21 57 22 ${tail} Q23 57 25 53 C28 48 30 42 27 36 Z`} fill={stage.color} />
+        <Path d={`M19.5 37 C18 42 19.5 47 22 ${tail - 6} C24.5 47 26 42 24.5 37 Z`} fill={stage.core} />
         <Path d="M15 23 Q9 26 8 33 L8 36 L16 32 Z M29 23 Q35 26 36 33 L36 36 L28 32 Z" fill={accent} />
         <Path d="M22 4 C17 8 14 16 15 25 Q15 30 18 33 L26 33 Q29 30 29 25 C30 16 27 8 22 4 Z" fill={body} stroke={edge} strokeWidth={1.2} strokeLinejoin="round" />
         <Path d="M22 4 Q17.5 8 15.6 14 L28.4 14 Q26.5 8 22 4 Z" fill={accent} />

@@ -34,6 +34,7 @@ function Navigation() {
           headerTitleStyle: { fontFamily: 'ManropeBold' },
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="rocket-preview" options={{ headerShown: false }} />
         <Stack.Screen name="sleep" options={{ title: 'Como você dormiu?', presentation: 'modal' }} />
         <Stack.Screen name="habit/new" options={{ title: 'Nova atividade', presentation: 'modal', headerShown: false }} />
         <Stack.Screen name="profile/edit" options={{ title: 'Editar perfil', presentation: 'modal' }} />
