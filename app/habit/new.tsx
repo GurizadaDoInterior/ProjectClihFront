@@ -5,7 +5,7 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { z } from 'zod';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteArea, createArea, createHabit, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
+import { deleteArea, createArea, createHabit, getTodaySummary, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
@@ -15,6 +15,7 @@ import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider
 
 const habitSchema = z.object({
   name: z.string().trim().min(3, 'Digite ao menos 3 caracteres').max(80),
+  dayPeriods: z.array(z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'ANYTIME'])).min(1, 'Selecione ao menos um turno.'),
   target: z
     .string()
     .trim()
@@ -53,7 +54,7 @@ export default function NewHabitScreen() {
   const [newArea, setNewArea] = useState('');
   const [measurement, setMeasurement] = useState(measurements[0]);
   const [days, setDays] = useState(weekDays);
-  const [selectedPeriods, setSelectedPeriods] = useState<DayPeriod[]>(['MORNING']);
+
   const [submitError, setSubmitError] = useState('');
   const [creatingArea, setCreatingArea] = useState(false);
   const [deletingArea, setDeletingArea] = useState<{ id: string; name: string } | null>(null);
@@ -69,16 +70,24 @@ export default function NewHabitScreen() {
   });
   const {
     control,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<HabitForm>({
     resolver: zodResolver(habitSchema),
-    defaultValues: { name: '', target: '1' },
+    defaultValues: { name: '', target: '1', dayPeriods: ['MORNING'] },
   });
 
+  const selectedPeriods = watch('dayPeriods');
+  function togglePeriod(period: DayPeriod) {
+    const current = watch('dayPeriods');
+    const next = period === 'ANYTIME' ? ['ANYTIME' as DayPeriod] : current.includes(period) ? current.filter(item => item !== period) : [...current.filter(item => item !== 'ANYTIME'), period];
+    setValue('dayPeriods', next, { shouldValidate: true });
+  }
   async function submit(values: HabitForm) {
     setSubmitError('');
-    if (!selectedPeriods.length) { setSubmitError('Selecione ao menos um turno.'); return; }
+    if (!values.dayPeriods.length) { setSubmitError('Selecione ao menos um turno.'); return; }
     if (!days.length) {
       setSubmitError('Selecione ao menos um dia da semana.');
       return;
@@ -94,11 +103,12 @@ export default function NewHabitScreen() {
         targetValue: measurement.value === 'BOOLEAN' ? 1 : Number(values.target.replace(',', '.')),
         measurementType: measurement.value,
         unit: measurement.unit,
-        dayPeriod: selectedPeriods[0],
-        dayPeriods: selectedPeriods,
+        dayPeriod: values.dayPeriods[0],
+        dayPeriods: values.dayPeriods,
         scheduledDays: days,
       });
-      await queryClient.invalidateQueries({ queryKey: ['today'] });
+      await queryClient.cancelQueries({ queryKey: ['today'] });
+      queryClient.setQueryData(['today'], await getTodaySummary());
       void queryClient.invalidateQueries({ queryKey: ['calendar-activities'] });
       void queryClient.invalidateQueries({ queryKey: ['day-history'] });
       if (router.canGoBack()) router.back(); else router.replace('/routine');
@@ -243,11 +253,13 @@ export default function NewHabitScreen() {
         {periods.map(label => {
           const period = periodValues[label];
           const checked = selectedPeriods.includes(period);
-          return <Pressable key={period} accessibilityRole="checkbox" accessibilityState={{checked}} onPress={() => setSelectedPeriods(current => period === 'ANYTIME' ? ['ANYTIME'] : current.includes(period) ? current.filter(item => item !== period) : [...current.filter(item => item !== 'ANYTIME'), period])} style={[styles.period,checked && styles.periodSelected]}>
+          return <Pressable key={period} accessibilityRole="checkbox" accessibilityState={{checked}} onPress={() => togglePeriod(period)} style={[styles.period,checked && styles.periodSelected]}>
             <Text style={[styles.periodText,checked && styles.periodTextSelected]}>{label}</Text>
           </Pressable>;
         })}
       </View>
+      <Text accessibilityLiveRegion="polite" style={styles.intro}>Turnos selecionados: {periods.filter(label => selectedPeriods.includes(periodValues[label])).join(' e ') || 'nenhum'}</Text>
+      {errors.dayPeriods ? <Text style={styles.error}>{errors.dayPeriods.message}</Text> : null}
       {submitError ? (
         <Text accessibilityRole="alert" style={styles.error}>
           {submitError}

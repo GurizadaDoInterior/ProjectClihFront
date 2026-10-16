@@ -72,7 +72,7 @@ export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: 
   </Pressable>;
 }
 const getStyles = (colors: Palette) => themedStyles({
-  row: { minHeight: 92, flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
+  row: { minHeight: 92, flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 7, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
   toggle: { width: 32, height: 32, borderWidth: 1.5, borderColor: colors.muted, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
   checked: { backgroundColor: '#15803D', borderColor: '#15803D' },
   check: { fontSize: 21, fontWeight: '700', color: '#FFFFFF' },
