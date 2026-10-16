@@ -77,7 +77,8 @@ export default function ProgressScreen() {
     </View></Animated.View>
     <View style={{ marginTop: 28 }}><SectionHeader>SEUS ATRIBUTOS</SectionHeader></View>
     <Text style={styles.sub}>Desempenho de hoje em cada área.</Text>
-    {areas.length ? <AreaRadar areas={areas} /> : <Text style={styles.sub}>Crie sua primeira área para acompanhar seus atributos.</Text>}
+    <AreaRadar areas={areas} />
+    <Text style={styles.sub}>Áreas ainda sem cadastro aparecem com —.</Text>
     {areas.length ? areas.map((area, i) => <View key={area.id} style={styles.areaRow}>
       <Text style={styles.index}>{String(i + 1).padStart(2,'0')}</Text>
       <View style={{ flex: 1 }}><View style={styles.areaCopy}><Text style={styles.areaName}>{area.name}</Text><Text style={styles.areaValue}>{area.value}%</Text></View>
