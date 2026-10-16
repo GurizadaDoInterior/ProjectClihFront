@@ -1,7 +1,7 @@
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
-import { Platform, Pressable, Text, View } from 'react-native';
+import { Platform, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { ActivityRow } from '@/src/components/activity-row';
 import { AppScreen } from '@/src/components/app-screen';
 import { StreakRocket } from '@/src/components/streak-rocket';
@@ -14,6 +14,7 @@ import { isDemo } from '@/src/services/api/client';
 export default function TodayScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
+  const rocketSize = useWindowDimensions().width < 360 ? 76 : 84;
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
   if (isError || !data) return <AppScreen>
@@ -49,9 +50,9 @@ export default function TodayScreen() {
     </View>
 
     <View style={styles.metrics}>
-      <View style={styles.metric}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StreakRocket days={data.streakDays} /><Text style={[styles.metricNumber, { color: getFlameStage(data.streakDays).color }]}>{data.streakDays}</Text></View><Text style={styles.metricLabel}>DIAS EM SEQUÊNCIA</Text></View>
-      <View style={[styles.metric, styles.metricMiddle]}><Text style={styles.metricNumber}>{data.level}<Text style={styles.metricUnit}> NÍVEL</Text></Text><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
-      <View style={styles.metric}><Text style={styles.metricNumber}>{data.xp.toLocaleString('pt-BR')}</Text><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
+      <View style={[styles.metric, styles.streakMetric]}><View style={[styles.metricValue, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 2 }]}><StreakRocket days={data.streakDays} size={rocketSize} /><Text style={[styles.metricNumber, { color: getFlameStage(data.streakDays).color }]}>{data.streakDays}</Text></View><Text style={styles.metricLabel}>DIAS EM SEQUÊNCIA</Text></View>
+      <View style={[styles.metric, styles.metricMiddle]}><View style={styles.metricValue}><Text style={styles.metricNumber}>{data.level}<Text style={styles.metricUnit}> NÍVEL</Text></Text></View><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
+      <View style={styles.metric}><View style={styles.metricValue}><Text style={styles.metricNumber}>{data.xp.toLocaleString('pt-BR')}</Text></View><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
     </View>
     <WeekStrip days={data.week} />
 
@@ -86,7 +87,9 @@ const getStyles = (colors: Palette) => themedStyles({
   scoreTrack: { height: 3, backgroundColor: '#17120C30', marginTop: 7 },
   scoreFill: { height: '100%', backgroundColor: '#17120C' },
   metrics: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 18, marginBottom: 4 },
-  metric: { flex: 1, paddingHorizontal: 10 },
+  metric: { flex: 1, minWidth: 0, paddingHorizontal: 8 },
+  streakMetric: { flex: 1.35, paddingHorizontal: 4 },
+  metricValue: { height: 84, justifyContent: 'center', alignItems: 'flex-start' },
   metricMiddle: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border },
   metricNumber: { color: colors.ink, fontSize: 29, fontWeight: '700' },
   metricUnit: { color: colors.muted, fontSize: 10, fontWeight: '700' },
