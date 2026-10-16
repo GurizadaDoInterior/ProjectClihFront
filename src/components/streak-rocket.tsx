@@ -1,18 +1,16 @@
 import { View } from 'react-native';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import { getFlameStage } from '@/src/features/streak/flame';
-import { useTheme } from '@/src/theme/theme-provider';
 
 export function StreakRocket({ days, size = 84 }: { days: number; size?: number }) {
   const stage = getFlameStage(days);
-  const { mode } = useTheme();
   const power = Math.max(0, [0, 3, 10, 30, 50, 100, 200, 300].filter(mark => days >= mark).length - 1);
   const flameWidth = 0.85 + power * 0.075;
   const flameLength = 0.55 + power * 0.13;
   const plume = 'M17 36 C13 41 16 46 15 49 C14 53 20 57 22 66 C24 57 30 53 29 49 C28 46 31 41 27 36 Z';
-  const body = mode === 'dark' ? '#D6DCE0' : '#DCE1E4';
-  const edge = mode === 'dark' ? '#8A9AA6' : '#405565';
-  const accent = power >= 3 ? stage.color : '#D37340';
+  const body = '#369DB5';
+  const edge = '#20365D';
+  const accent = power >= 3 ? stage.color : '#EF563D';
   return <View accessible accessibilityRole="image" accessibilityLabel={`Foguete: ${stage.name}, ${days} dias em sequência`}>
     <Svg width={size} height={size} viewBox="-10 -6 72 76">
       <G transform="rotate(-42 22 30)">
@@ -31,14 +29,24 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
             <Path d={`M${44-x} ${y} q2 2 1 ${3 + power * 0.45}`} />
           </G>;
         })}
-        <Path d="M17 21 L8 30 L7 36 L17 31 Z M27 21 L36 30 L37 36 L27 31 Z" fill={edge} />
-        <Path d="M16 25 L10 31 L10 33 L17 29 Z M28 25 L34 31 L34 33 L27 29 Z" fill={accent} />
-        <Path d="M22 3 L27.5 14 Q29 18 27.5 25 L25 34 L19 34 L16.5 25 Q15 18 16.5 14 Z" fill={body} stroke={edge} strokeWidth={1} strokeLinejoin="round" />
-        <Path d="M22 3 L27.5 14 Q29 18 27.5 25 L25 34 L22 34 Z" fill={edge} opacity={0.18} />
-        <Path d="M22 13 L24.5 18 L24 23 L20 23 L19.5 18 Z" fill={edge} />
-        <Path d="M22 15.5 L23.1 18.5 L22.8 21.5 L21.2 21.5 L20.9 18.5 Z" fill="#8DB7C6" />
-        <Path d="M18.5 27 L20 31 L24 31 L25.5 27" stroke={accent} strokeWidth={1.8} fill="none" />
-        <Path d="M18.5 34 L25.5 34 L27 37 L17 37 Z" fill={edge} />
+        <Path d="M14 23 L7 22 L1 38 L10 31 L16 33 Z M30 23 L37 22 L43 38 L34 31 L28 33 Z" fill={edge} />
+        <Path d="M14 23 L7 22 L1 38 L8 29 L15 30 Z" fill="#EA4937" />
+        <Path d="M30 23 L37 22 L43 38 L36 29 L29 30 Z" fill="#D6372D" />
+        <Path d="M22 1 C13 8 10 21 15 31 L17 34 L27 34 L29 31 C34 21 31 8 22 1 Z" fill={body} />
+        <Path d="M22 1 C17 10 16 23 20 34 L17 34 L15 31 C10 21 13 8 22 1 Z" fill="#8DD5DD" />
+        <Path d="M22 1 C31 8 34 21 29 31 L27 34 L24 34 C29 23 29 12 22 1 Z" fill="#177A96" />
+        <Path d="M22 1 C17.5 4.5 14.4 9 13.3 13 Q22 17 30.7 13 C29.6 9 26.5 4.5 22 1 Z" fill="#EF4C36" />
+        <Path d="M22 1 Q17.6 7 16.5 13.8 L13.3 13 C14.4 9 17.5 4.5 22 1 Z" fill="#FF9272" />
+        <Path d="M22 1 Q27.8 7 27.8 14 L30.7 13 C29.6 9 26.5 4.5 22 1 Z" fill="#C8302A" />
+        <Path d="M13.3 13 Q22 17 30.7 13" stroke={edge} strokeWidth={1.5} fill="none" />
+        <Circle cx={22} cy={22} r={5.7} fill={edge} />
+        <Circle cx={22} cy={22} r={4.25} fill="#F6FAF8" />
+        <Circle cx={22} cy={22} r={3.05} fill="#8DD5DD" />
+        <Path d="M20.4 21.2 Q20.6 19.8 22 20" stroke="#FFFFFF" strokeWidth={1.1} strokeLinecap="round" fill="none" />
+        <Path d="M16 31 L28 31 L27 34 L17 34 Z" fill={accent} />
+        <Path d="M22 27 Q19 30 20.2 34 L22 36 L23.8 34 Q25 30 22 27 Z" fill="#EF563D" />
+        <Path d="M17 34 L27 34 L29 37 L15 37 Z" fill={edge} />
+        <Path d="M17 34 L22 34 L22 37 L15 37 Z" fill="#345187" />
       </G>
     </Svg>
   </View>;
