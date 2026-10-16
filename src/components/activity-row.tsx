@@ -68,7 +68,7 @@ export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: 
       <Text style={[styles.title, activity.completed && styles.completedTitle]}>{activity.title}</Text>
       <Text style={styles.target}>{activity.target}</Text>
     </View>
-    <Text style={[styles.status, activity.completed && { color: colors.orange }]}>{activity.completed ? 'FEITO' : 'A FAZER'}</Text>
+    <Text style={styles.status}>{activity.completed ? 'FEITO' : 'A FAZER'}</Text>
   </Pressable>;
 }
 const getStyles = (colors: Palette) => themedStyles({
