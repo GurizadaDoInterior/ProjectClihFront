@@ -29,6 +29,7 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
             <Path d={`M${44-x} ${y} q2 2 1 ${3 + power * 0.45}`} />
           </G>;
         })}
+        <G transform="translate(0 -5.55) scale(1 1.15)">
         <Path d="M14 23 L7 22 L1 38 L10 31 L16 33 Z M30 23 L37 22 L43 38 L34 31 L28 33 Z" fill={edge} />
         <Path d="M14 23 L7 22 L1 38 L8 29 L15 30 Z" fill="#EA4937" />
         <Path d="M30 23 L37 22 L43 38 L36 29 L29 30 Z" fill="#D6372D" />
@@ -47,6 +48,7 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
         <Path d="M22 27 Q19 30 20.2 34 L22 36 L23.8 34 Q25 30 22 27 Z" fill="#EF563D" />
         <Path d="M17 34 L27 34 L29 37 L15 37 Z" fill={edge} />
         <Path d="M17 34 L22 34 L22 37 L15 37 Z" fill="#345187" />
+        </G>
       </G>
     </Svg>
   </View>;
