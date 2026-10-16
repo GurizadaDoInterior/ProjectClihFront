@@ -1,10 +1,16 @@
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Polygon, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '@/src/theme/theme-provider';
 export type RadarArea = { id: string; name: string; value: number };
 export function AreaRadar({ areas }: { areas: RadarArea[] }) {
   const { colors } = useTheme();
-  if (areas.length < 3) return null;
+  if (!areas.length) return null;
+  if (areas.length < 3) return <View accessibilityRole="image" accessibilityLabel={'Desempenho por área: '+areas.map(area=>`${area.name} ${area.value}%`).join(', ')} style={{paddingVertical:24,gap:20}}>
+    {areas.map(area=><View key={area.id} style={{gap:10}}>
+      <View style={{flexDirection:'row',justifyContent:'space-between',gap:12}}><Text style={{color:colors.ink,fontSize:16,fontWeight:'600'}}>{area.name}</Text><Text style={{color:colors.orange,fontSize:18,fontWeight:'700'}}>{area.value}%</Text></View>
+      <View style={{height:12,backgroundColor:colors.surfaceMuted,borderRadius:6,overflow:'hidden'}}><View style={{height:'100%',width:`${Math.max(0,Math.min(100,area.value))}%`,backgroundColor:colors.orange,borderRadius:6}}/></View>
+    </View>)}
+  </View>;
   const point = (index: number, scale: number) => {
     const angle = -Math.PI / 2 + index * Math.PI * 2 / areas.length;
     return { x: 180 + Math.cos(angle) * 100 * scale, y: 180 + Math.sin(angle) * 100 * scale };

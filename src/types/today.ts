@@ -7,6 +7,7 @@ export type DailyActivity = {
   area: AreaKey;
   completed: boolean;
   completionId?: string | null;
+  xpAwarded?: number;
   areaName?: string;
   areaColor?: string;
   period?: import('../services/api/contracts').DayPeriod;

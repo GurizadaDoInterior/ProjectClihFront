@@ -273,7 +273,7 @@ const getStyles = (colors: Palette) => themedStyles({
     fontSize: 15,
   },
   error: { color: colors.danger, fontSize: 11, marginTop: 5 },
-  periods: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
+  periods: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginBottom: 20 },
   period: {
     paddingHorizontal: 14,
     paddingVertical: 11,

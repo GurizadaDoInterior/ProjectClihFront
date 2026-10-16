@@ -1,3 +1,4 @@
+import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { Platform, Pressable, Text, View } from 'react-native';
@@ -62,7 +63,7 @@ export default function TodayScreen() {
 
     <Link href="/sleep" asChild><Pressable accessibilityRole="button" style={styles.sleep}>
       <View><Text style={styles.eyebrow}>RECUPERAÇÃO</Text><Text style={styles.sleepTitle}>O descanso também conta.</Text><Text style={styles.sub}>Registrar horários de sono</Text></View>
-      <Text style={styles.arrow}>↗</Text>
+      <Svg accessible={false} width={32} height={32} viewBox="0 0 24 24"><Path d="M5 19 19 5M5 5h14v14" stroke={colors.orange} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" fill="none" /></Svg>
     </Pressable></Link>
   </AppScreen>;
 }

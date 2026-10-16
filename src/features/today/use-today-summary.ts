@@ -9,21 +9,30 @@ const todayKey = ['today'] as const;
 export function useTodaySummary() {
   const queryClient = useQueryClient();
   const [xpReward, setXpReward] = useState<{ habitId: string; amount: number; eventId: number } | null>(null);
-  const query = useQuery({ queryKey: todayKey, queryFn: getTodaySummary, refetchInterval: 60_000 });
+  const query = useQuery({ queryKey: todayKey, queryFn: getTodaySummary, staleTime: 30_000, refetchInterval: 60_000 });
   const toggleMutation = useMutation({
     mutationFn: async (activity: DailyActivity) => {
       if (activity.completed) {
-        const before = queryClient.getQueryData<TodaySummary>(todayKey)?.xp ?? 0;
         await undoHabit(activity.id, activity.completionId);
-        const after = await getTodaySummary();
-        queryClient.setQueryData(todayKey, after);
-        const amount = before - after.xp;
-        if (amount > 0) setXpReward({ habitId: activity.id, amount: -amount, eventId: Date.now() });
         return undefined;
       }
       return completeHabit(activity.id);
     },
     onSuccess: (result, activity) => {
+      if (!activity.completed && result) {
+        queryClient.setQueryData<TodaySummary>(todayKey, current => current ? {
+          ...current,
+          ...(result.progress ? {
+            xp: result.progress.totalXp,
+            level: result.progress.level,
+            xpInLevel: result.progress.totalXp - result.progress.xpForCurrentLevel,
+            xpToNextLevel: result.progress.xpForNextLevel - result.progress.xpForCurrentLevel,
+            streakDays: result.progress.currentStreak,
+            longestStreak: result.progress.longestStreak,
+          } : {}),
+          activities: current.activities.map(item => item.id === activity.id ? { ...item, completed: true, completionId: result.id, xpAwarded: result.xpAwarded } : item),
+        } : current);
+      }
       if (!activity.completed && result && result.xpAwarded > 0 && !result.idempotentReplay) {
         setXpReward({ habitId: activity.id, amount: result.xpAwarded, eventId: Date.now() });
       }
@@ -32,6 +41,9 @@ export function useTodaySummary() {
       setXpReward(null);
       await queryClient.cancelQueries({ queryKey: todayKey });
       const previous = queryClient.getQueryData<TodaySummary>(todayKey);
+      if (selected.completed && (selected.xpAwarded ?? 0) > 0) {
+        setXpReward({ habitId: selected.id, amount: -selected.xpAwarded!, eventId: Date.now() });
+      }
 
       queryClient.setQueryData<TodaySummary>(todayKey, (current) => {
         if (!current) return current;
@@ -46,9 +58,14 @@ export function useTodaySummary() {
       return { previous };
     },
     onError: (_error, _habitId, context) => {
+      setXpReward(null);
       if (context?.previous) queryClient.setQueryData(todayKey, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: todayKey }),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: todayKey });
+      void queryClient.invalidateQueries({ queryKey: ['day-history'] });
+      void queryClient.invalidateQueries({ queryKey: ['calendar-activities'] });
+    },
   });
 
   return {

@@ -36,6 +36,7 @@ export function mapToday(response: TodayResponse): TodaySummary {
       period: habit.dayPeriod,
       completed: habit.completed,
       completionId: habit.completionId,
+      xpAwarded: habit.xpAwarded ?? 0,
     })),
   };
 }

@@ -197,9 +197,10 @@ test('profile PATCH leaves an unset username unchanged and sends the selected ti
   assert.equal(result.username, null);
 });
 
-test('completed habits preserve the completion ID needed for cancellation', () => {
-  const response = { ...today, habits: [{ ...today.habits[0], completed: true, completionId: 'c1' }] };
+test('completed habits preserve the completion ID and awarded XP for immediate cancellation feedback', () => {
+  const response = { ...today, habits: [{ ...today.habits[0], completed: true, completionId: 'c1', xpAwarded: 25 }] };
   assert.equal(mapToday(response).activities[0].completionId, 'c1');
+  assert.equal(mapToday(response).activities[0].xpAwarded, 25);
 });
 test('undo calls the completion DELETE endpoint and accepts an empty response', async () => {
   const { undoHabit } = require('../src/services/api/today-api.ts');

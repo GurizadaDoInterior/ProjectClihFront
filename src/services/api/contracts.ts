@@ -52,6 +52,7 @@ export type TodayResponse = {
     preferredTime: string | null;
     completed: boolean;
     completionId?: string | null;
+    xpAwarded?: number;
   }[];
 };
 export type CreateHabit = {

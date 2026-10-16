@@ -1,6 +1,6 @@
 import { demoToday } from '../../features/today/demo-data';
 import { ApiError, isDemo, request } from './client';
-import type { Area, CreateHabit, TodayResponse, User } from './contracts';
+import type { Area, CreateHabit, TodayResponse, User, Progress } from './contracts';
 import { mapToday } from './today-mapper';
 let demo = JSON.parse(JSON.stringify(demoToday)) as typeof demoToday;
 export async function getTodaySummary() {
@@ -21,7 +21,7 @@ export async function completeHabit(habitId: string) {
   const idempotencyKey = `${habitId}:${completedAt}`;
   for (let attempt = 0; ; attempt++) {
     try {
-      return await request<{ xpAwarded: number; idempotentReplay: boolean }>(`/habits/${habitId}/completions`, {
+      return await request<{ id: string; xpAwarded: number; idempotentReplay: boolean; progress: Progress }>(`/habits/${habitId}/completions`, {
         method: 'POST',
         headers: { 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify({ completedAt }),
