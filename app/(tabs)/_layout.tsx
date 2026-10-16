@@ -19,9 +19,12 @@ export default function TabLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   return (
-    <Tabs
+    <Tabs detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
+        lazy: false,
+        freezeOnBlur: false,
+        animation: 'none',
         tabBarButton: ({ref, ...props}) => <MotionPressable {...props} ref={ref as Ref<View>} />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
