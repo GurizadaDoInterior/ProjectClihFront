@@ -16,7 +16,7 @@ export function SmoothReveal({ visible, children }: { visible: boolean; children
     return () => observer.disconnect();
   }, []);
 
-  const duration = visible ? 440 : 420;
+  const duration = visible ? 560 : 520;
   return (
     <div
       aria-hidden={!visible}
@@ -25,7 +25,7 @@ export function SmoothReveal({ visible, children }: { visible: boolean; children
         height: visible ? height : 0,
         overflow: 'hidden',
         opacity: visible ? 1 : 0,
-        transition: reduced ? 'none' : `height ${duration}ms cubic-bezier(.37,0,.63,1), opacity ${duration}ms ease`,
+        transition: reduced ? 'none' : `height ${duration}ms cubic-bezier(.33,0,.2,1), opacity ${duration}ms ease`,
         pointerEvents: visible ? 'auto' : 'none',
       }}>
       <div ref={content}>{children}</div>
