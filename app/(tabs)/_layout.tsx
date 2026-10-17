@@ -1,5 +1,6 @@
 import type { Ref } from 'react';
-import type { View } from 'react-native';
+import { Platform, type View } from 'react-native';
+import { handleNavigationPress } from '@/src/components/navigation-press';
 import { MotionPressable } from '@/src/components/motion-pressable';
 import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
@@ -25,7 +26,7 @@ export default function TabLayout() {
         lazy: false,
         freezeOnBlur: false,
         animation: 'none',
-        tabBarButton: ({ref, ...props}) => <MotionPressable {...props} ref={ref as Ref<View>} />,
+        tabBarButton: ({ref, onPress, href, ...props}) => <MotionPressable {...props} {...{href}} ref={ref as Ref<View>} onPress={event => handleNavigationPress(event, onPress, Platform.OS === 'web', href)} />,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelPosition: 'below-icon',
