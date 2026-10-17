@@ -6,7 +6,7 @@ export function SmoothReveal({visible,children}:{visible:boolean;children:ReactN
   const [height,setHeight]=useState(0);
   const progress=useRef(new Animated.Value(visible ? 1 : 0)).current;
   useEffect(()=>{
-    const animation=Animated.timing(progress,{toValue:visible ? 1 : 0,duration:reduced ? 0 : 300,easing:Easing.out(Easing.cubic),useNativeDriver:false});
+    const animation=Animated.timing(progress,{toValue:visible ? 1 : 0,duration:reduced ? 0 : visible ? 440 : 420,easing:Easing.inOut(Easing.sin),useNativeDriver:false});
     animation.start();return ()=>animation.stop();
   },[visible,reduced,progress]);
   return <Animated.View pointerEvents={visible ? 'auto' : 'none'} accessibilityElementsHidden={!visible} importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'} style={{height:progress.interpolate({inputRange:[0,1],outputRange:[0,height]}),opacity:progress,overflow:'hidden'}}>
