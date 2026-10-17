@@ -22,7 +22,7 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
     if(Platform.OS === 'web') {
       const element=screen.current as unknown as HTMLElement | null;
       if(reduceMotion || typeof element?.animate !== 'function')return;
-      const animation=element.animate([{opacity:0.97},{opacity:1}],{duration:150,easing:'ease-out'});
+      const animation=element.animate([{opacity:0.9},{opacity:1}],{duration:220,easing:'cubic-bezier(.16,1,.3,1)'});
       return ()=>animation.cancel();
     }
     reveal.stopAnimation();
