@@ -17,6 +17,6 @@ export const MotionPressable = forwardRef<View, PressableProps>(function MotionP
   const resolvedStyle=typeof style === 'function' ? style({pressed:!disabled && pressed,hovered:!disabled && hovered}) : style;
   const existingTransition=(StyleSheet.flatten(resolvedStyle) as (ViewStyle & {transition?:string}) | undefined)?.transition;
   const transition=reduced ? '' : `transform ${pressed ? 110 : 240}ms cubic-bezier(.16,1,.3,1), background-color 200ms ease, border-color 200ms ease, color 180ms ease, opacity 180ms ease`;
-  const webFeedback=Platform.OS === 'web' ? ({transition:[existingTransition,transition].filter(Boolean).join(', '),transform:[{scale:!reduced && !disabled && pressed && !onPressIn && !onPressOut ? 0.975 : 1}]} as ViewStyle) : {transform:[{scale}]};
+  const webFeedback=Platform.OS === 'web' ? ({transition:reduced ? 'none' : [existingTransition,transition].filter(Boolean).join(', '),transform:[{scale:!reduced && !disabled && pressed && !onPressIn && !onPressOut ? 0.975 : 1}]} as ViewStyle) : {transform:[{scale}]};
   return <AnimatedPressable {...props} ref={ref} disabled={disabled} onHoverIn={event => {setHovered(true);onHoverIn?.(event);}} onHoverOut={event => {setHovered(false);onHoverOut?.(event);}} onPressIn={event => {setPressed(true);animate(true);onPressIn?.(event);}} onPressOut={event => {setPressed(false);animate(false);onPressOut?.(event);}} style={[resolvedStyle,webFeedback]} />;
 });
