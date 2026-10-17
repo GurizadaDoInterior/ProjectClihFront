@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Animated, Easing, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 import { formatTimeInput, normalizeTimeInput } from '@/src/features/sleep/time-input';
 
@@ -34,11 +34,6 @@ export default function SleepScreen() {
   const [selected, setSelected] = useState(dateKey(new Date()));
   const [month, setMonth] = useState(new Date());
   const [saved, setSaved] = useState(false);
-  const buttonScale = useRef(new Animated.Value(1)).current;
-  function animateButton(toValue: number) {
-    Animated.timing(buttonScale, { toValue, duration: 180, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
-  }
-  useEffect(() => () => buttonScale.stopAnimation(), [buttonScale]);
   const from = dateKey(new Date(month.getFullYear(), month.getMonth(), -6));
   const to = dateKey(new Date(month.getFullYear(), month.getMonth()+1, 0));
   const history = useQuery({ queryKey: ['sleep', from, to], placeholderData: keepPreviousData, queryFn: () => request<SleepEntry[]>('/sleep?from='+from+'&to='+to) });
@@ -56,12 +51,9 @@ export default function SleepScreen() {
     reset(entry ? { sleptAt: entry.sleptAt, wokeAt: entry.wokeAt, quality: entry.quality as SleepForm['quality'] } : { sleptAt: '23:00', wokeAt: '07:00', quality: 'Boa' });
     setSaved(false);
   }, [selected, history.data, history.isPlaceholderData, reset]);
-  useEffect(() => {
-    if (isSubmitting || saved) animateButton(1);
-  }, [isSubmitting, saved]);
   async function submit(values: SleepForm) {
     if (saved) return;
-    animateButton(1);
+
 
     setSaveError(null); setSaved(false);
     try {
@@ -148,18 +140,16 @@ export default function SleepScreen() {
         )}
       />
 
-      <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+
       <Pressable
         accessibilityRole="button"
         disabled={isSubmitting || saved}
         accessibilityState={{ disabled: isSubmitting || saved, busy: isSubmitting }}
-        onPressIn={() => animateButton(0.98)}
-        onPressOut={() => animateButton(1)}
         onPress={handleSubmit(submit)}
         style={[styles.submit, { backgroundColor: saved ? '#15803D' : colors.primary }, Platform.OS === 'web' && ({ transition: 'background-color 300ms ease' } as unknown as import('react-native').ViewStyle)]}>
         <Text accessibilityLiveRegion="polite" style={[styles.submitText, saved && { color: '#FFFFFF' }]}>{isSubmitting ? 'Salvando...' : saved ? '✓ Registro salvo' : 'Salvar registro'}</Text>
       </Pressable>
-      </Animated.View>
+
       {history.isPending ? <Text style={styles.intro}>Carregando histórico...</Text> : history.isError ? <Pressable onPress={() => history.refetch()}><Text style={styles.error}>Não foi possível carregar o histórico. Toque para tentar novamente.</Text></Pressable> : <SleepHistory month={month} selected={selected} entries={history.data ?? []} onMonth={date => { setMonth(date); setSelected(dateKey(date)); }} onSelect={setSelected} />}
     </AppScreen>
   );

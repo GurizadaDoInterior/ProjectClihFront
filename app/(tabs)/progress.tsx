@@ -1,12 +1,13 @@
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { SmoothReveal } from '@/src/components/smooth-reveal';
 import { Link } from 'expo-router';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { SleepHistory, dateKey, type SleepEntry } from '@/src/components/sleep-history';
 import { request } from '@/src/services/api/client';
 import { mapToday } from '@/src/services/api/today-mapper';
 import type { TodayResponse } from '@/src/services/api/contracts';
-import { AccessibilityInfo, Animated, Easing, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { AreaRadar } from '@/src/components/area-radar';
 import { WeekStrip } from '@/src/components/week-strip';
@@ -18,20 +19,6 @@ export default function ProgressScreen() {
   const styles = getStyles(colors);
   const { data, error, refetch } = useTodaySummary();
   const [showCalendar, setShowCalendar] = useState(false);
-  const [calendarHeight, setCalendarHeight] = useState(0);
-  const [reduceMotion, setReduceMotion] = useState(true);
-  const calendarReveal = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    let active = true;
-    AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) setReduceMotion(value); }).catch(() => {});
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    return () => { active = false; subscription.remove(); };
-  }, []);
-  useEffect(() => {
-    const animation = Animated.timing(calendarReveal, { toValue: showCalendar ? 1 : 0, duration: reduceMotion ? 0 : showCalendar ? 440 : 420, easing: Easing.inOut(Easing.sin), useNativeDriver: false });
-    animation.start();
-    return () => animation.stop();
-  }, [showCalendar, reduceMotion, calendarReveal]);
   const [selected, setSelected] = useState(dateKey(new Date()));
   const [month, setMonth] = useState(new Date());
   const from = dateKey(new Date(month.getFullYear(), month.getMonth(), -6));
@@ -64,8 +51,7 @@ export default function ProgressScreen() {
     <Pressable accessibilityRole="button" accessibilityState={{expanded:showCalendar}} onPress={() => setShowCalendar(value => !value)} style={({pressed}) => ({paddingVertical:16,marginTop:20,borderWidth:1,borderColor:colors.border,borderRadius:8,alignItems:'center',opacity:pressed?0.85:1})}>
       <Text style={{color:colors.primary,fontWeight:'700'}}>{showCalendar ? 'Ocultar calendário ↑' : 'Ver calendário ↓'}</Text>
     </Pressable>
-    <Animated.View pointerEvents={showCalendar ? 'auto' : 'none'} accessibilityElementsHidden={!showCalendar} importantForAccessibility={showCalendar ? 'auto' : 'no-hide-descendants'} style={{ height: calendarReveal.interpolate({inputRange:[0,1],outputRange:[0,calendarHeight]}), overflow:'hidden', opacity:calendarReveal }}>
-    <View aria-hidden={!showCalendar} onLayout={event => setCalendarHeight(event.nativeEvent.layout.height)} style={{position:'absolute',top:0,left:0,right:0}}>
+    <SmoothReveal visible={showCalendar}>
     {sleep.isPending ? <Text style={styles.sub}>Carregando calendário...</Text> : sleep.isError ? <Pressable onPress={() => sleep.refetch()}><Text style={styles.sub}>Não foi possível carregar o sono. Toque para tentar novamente.</Text></Pressable> : <SleepHistory overview activities={monthActivities.isPlaceholderData ? undefined : monthActivities.data} dayDetails={<View style={{ marginTop: 24, padding: 16, borderWidth: 1, borderColor: colors.border, borderRadius: 8, gap: 10 }}>
       <Text style={{color:colors.ink,fontWeight:'700',fontSize:18}}>ATIVIDADES • {selected.split('-').reverse().join('/')}</Text>
       {day.isPending ? <Text style={styles.sub}>Carregando atividades do dia...</Text> : day.isError ? <Pressable onPress={() => day.refetch()}><Text style={styles.sub}>Não foi possível carregar. Toque para tentar novamente.</Text></Pressable> : <>
@@ -75,7 +61,7 @@ export default function ProgressScreen() {
       </>}
       <Link href="/sleep" style={{color:colors.primary,fontWeight:'700',paddingVertical:10}}>REGISTRAR SONO →</Link>
     </View>} month={month} selected={selected} entries={sleep.data ?? []} onMonth={date => { setMonth(date); setSelected(dateKey(date)); }} onSelect={setSelected} />}
-    </View></Animated.View>
+    </SmoothReveal>
     <View style={{ marginTop: 28 }}><SectionHeader>SEUS ATRIBUTOS</SectionHeader></View>
     <Text style={styles.sub}>Desempenho de hoje em cada área.</Text>
     <AreaRadar areas={areas} />

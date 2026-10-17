@@ -1,3 +1,4 @@
+import { useReducedMotion } from './use-reduced-motion';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
@@ -9,18 +10,29 @@ export const dateKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1)
 const duration = (n: number) => `${Math.floor(n/60)}h${String(n%60).padStart(2,'0')}`;
 export function SleepHistory({ month, selected, entries, onMonth, onSelect, overview = false, activities, dayDetails }: { activities?: Record<string, { completed: number; planned: number }>; dayDetails?: ReactNode; overview?: boolean; month: Date; selected: string; entries: SleepEntry[]; onMonth: (d: Date) => void; onSelect: (d: string) => void }) {
  const {colors}=useTheme(); const today=dateKey(new Date());
+ const reduced=useReducedMotion();
+ const monthView=useRef<View>(null);
  const monthFade = useRef(new Animated.Value(1)).current;
  const monthKey = `${month.getFullYear()}-${month.getMonth()}`;
  const previousMonth = useRef(monthKey);
  useEffect(() => {
   if(previousMonth.current === monthKey) return;
+  const [year,monthNumber]=previousMonth.current.split('-').map(Number);
+  const direction=month.getFullYear()*12+month.getMonth() > year*12+monthNumber ? 1 : -1;
   previousMonth.current = monthKey;
+  if(reduced){monthFade.setValue(1);return;}
+  if(Platform.OS === 'web'){
+    const element=monthView.current as unknown as HTMLElement | null;
+    if(typeof element?.animate !== 'function')return;
+    const animation=element.animate([{opacity:0.88,transform:`translateX(${direction*6}px)`},{opacity:1,transform:'translateX(0)'}],{duration:240,easing:'cubic-bezier(.16,1,.3,1)'});
+    return ()=>animation.cancel();
+  }
   monthFade.stopAnimation();
   monthFade.setValue(0.9);
   const animation = Animated.timing(monthFade, {toValue:1,duration:240,easing:Easing.out(Easing.cubic),useNativeDriver:true});
   animation.start();
   return () => animation.stop();
- },[monthKey,monthFade]);
+ },[monthKey,monthFade,reduced]);
  const offset=(new Date(month.getFullYear(),month.getMonth(),1).getDay()+6)%7;
  const count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
  const entry=entries.find(e=>e.date===selected);
@@ -33,7 +45,7 @@ export function SleepHistory({ month, selected, entries, onMonth, onSelect, over
  <Text style={{color:colors.ink,fontWeight:'700'}}>{month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}</Text>
  <Pressable accessibilityLabel="Próximo mês" disabled={dateKey(month).slice(0,7)>=today.slice(0,7)} onPress={()=>onMonth(new Date(month.getFullYear(),month.getMonth()+1,1))} style={{padding:14}}><Text style={{color:colors.ink,fontSize:26}}>›</Text></Pressable>
  </View>
- <Animated.View style={{flexDirection:'row',flexWrap:'wrap',opacity:monthFade}}>
+ <Animated.View ref={monthView} style={{flexDirection:'row',flexWrap:'wrap',opacity:Platform.OS === 'web' ? 1 : monthFade}}>
  {['SEG','TER','QUA','QUI','SEX','SÁB','DOM'].map(d=><Text key={d} style={{width:'14.2857%',textAlign:'center',color:colors.muted,fontSize:10,paddingVertical:8}}>{d}</Text>)}
  {Array.from({length:42},(_,i)=>{
  if(i<offset || i>=offset+count)return <View key={'blank'+i} style={{width:'14.2857%',height:72}}/>;

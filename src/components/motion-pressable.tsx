@@ -12,10 +12,11 @@ export const MotionPressable = forwardRef<View, PressableProps>(function MotionP
     if (Platform.OS === 'web') return;
     scale.stopAnimation();
     if (reduced || disabled || onPressIn || onPressOut) { scale.setValue(1); return; }
-    Animated.timing(scale, {toValue:pressed ? 0.975 : 1, duration:pressed ? 90 : 160, easing:Easing.out(Easing.cubic), useNativeDriver:true}).start();
+    Animated.timing(scale, {toValue:pressed ? 0.975 : 1, duration:pressed ? 100 : 240, easing:Easing.out(Easing.cubic), useNativeDriver:true}).start();
   };
   const resolvedStyle=typeof style === 'function' ? style({pressed:!disabled && pressed,hovered:!disabled && hovered}) : style;
   const existingTransition=(StyleSheet.flatten(resolvedStyle) as (ViewStyle & {transition?:string}) | undefined)?.transition;
-  const webFeedback=Platform.OS === 'web' ? ({transition:[existingTransition,reduced ? '' : 'transform 140ms cubic-bezier(.2,.8,.2,1)'].filter(Boolean).join(', '),transform:[{scale:!reduced && !disabled && pressed && !onPressIn && !onPressOut ? 0.975 : 1}]} as ViewStyle) : {transform:[{scale}]};
+  const transition=reduced ? '' : `transform ${pressed ? 110 : 240}ms cubic-bezier(.16,1,.3,1), background-color 200ms ease, border-color 200ms ease, color 180ms ease, opacity 180ms ease`;
+  const webFeedback=Platform.OS === 'web' ? ({transition:[existingTransition,transition].filter(Boolean).join(', '),transform:[{scale:!reduced && !disabled && pressed && !onPressIn && !onPressOut ? 0.975 : 1}]} as ViewStyle) : {transform:[{scale}]};
   return <AnimatedPressable {...props} ref={ref} disabled={disabled} onHoverIn={event => {setHovered(true);onHoverIn?.(event);}} onHoverOut={event => {setHovered(false);onHoverOut?.(event);}} onPressIn={event => {setPressed(true);animate(true);onPressIn?.(event);}} onPressOut={event => {setPressed(false);animate(false);onPressOut?.(event);}} style={[resolvedStyle,webFeedback]} />;
 });
