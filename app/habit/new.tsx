@@ -2,11 +2,11 @@ import { MotionPressable as Pressable } from '@/src/components/motion-pressable'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { z } from 'zod';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteArea, createArea, createHabit, getTodaySummary, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
+import { deleteArea, deleteHabit, getAreaHabits, createArea, createHabit, getTodaySummary, getAreas, resolveHabitArea } from '@/src/services/api/today-api';
 import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
@@ -69,6 +69,15 @@ export default function NewHabitScreen() {
       void queryClient.invalidateQueries({ queryKey: ['today'] });
     },
   });
+  const linkedHabits = useQuery({queryKey:['area-habits',deletingArea?.id],enabled:deletingArea!==null,queryFn:()=>getAreaHabits(deletingArea!.id),staleTime:0});
+  const linkedDeletion = useMutation({
+    mutationFn:({id,period}:{id:string;period:DayPeriod})=>deleteHabit(id,period),
+    onSuccess:async()=>{
+      areaDeletion.reset(); await linkedHabits.refetch();
+      for(const key of ['today','day-history','calendar-activities']) void queryClient.invalidateQueries({queryKey:[key]});
+    },
+  });
+  const areaBusy=areaDeletion.isPending || linkedDeletion.isPending;
   const {
     control,
     watch,
@@ -158,7 +167,7 @@ export default function NewHabitScreen() {
           >
             <Text style={styles.periodText}>{area.name}</Text>
           </Pressable>
-          {!isDemo ? <Pressable accessibilityRole="button" accessibilityLabel={'Excluir área '+area.name} disabled={isSubmitting || creatingArea || areaDeletion.isPending} onPress={() => {areaDeletion.reset();setDeletingArea(area);}} style={{paddingVertical:10,alignItems:'center'}}><Text style={{color:colors.danger,fontSize:12}}>Excluir área</Text></Pressable> : null}
+          {!isDemo ? <Pressable accessibilityRole="button" accessibilityLabel={'Excluir área '+area.name} disabled={isSubmitting || creatingArea || areaDeletion.isPending} onPress={() => {areaDeletion.reset();linkedDeletion.reset();setDeletingArea(area);}} style={{paddingVertical:10,alignItems:'center'}}><Text style={{color:colors.danger,fontSize:12}}>Excluir área</Text></Pressable> : null}
         </View>))}
       </View>
       {!isDemo ? (
@@ -276,15 +285,27 @@ export default function NewHabitScreen() {
       >
         <Text style={styles.submitText}>{isSubmitting ? 'Criando...' : 'Criar atividade'}</Text>
       </Pressable>
-      <Modal visible={deletingArea !== null} transparent animationType="fade" onRequestClose={() => {if(!areaDeletion.isPending)setDeletingArea(null);}}>
+      <Modal visible={deletingArea !== null} transparent animationType="fade" onRequestClose={() => {if(!areaBusy)setDeletingArea(null);}}>
         <View style={{flex:1,backgroundColor:'#00000080',alignItems:'center',justifyContent:'center',padding:24}}>
           <View accessibilityViewIsModal style={{width:'100%',maxWidth:420,padding:24,borderRadius:16,backgroundColor:colors.surface,gap:16}}>
             <Text style={{color:colors.ink,fontSize:23,fontWeight:'700'}}>Excluir área?</Text>
-            <Text style={{color:colors.muted,lineHeight:22}}>Excluir “{deletingArea?.name}”? Áreas com atividades vinculadas só podem ser excluídas depois de remover ou mover suas atividades.</Text>
+            <Text style={{color:colors.muted,lineHeight:22}}>Excluir “{deletingArea?.name}”? A verificação considera todos os dias da semana, não apenas hoje.</Text>
+            {linkedHabits.isPending ? <Text style={{color:colors.muted}}>Verificando atividades vinculadas...</Text> : linkedHabits.isError ? <Pressable onPress={() => linkedHabits.refetch()}><Text style={{color:colors.danger}}>Não foi possível verificar os vínculos. Tentar novamente</Text></Pressable> : linkedHabits.data?.length ? <View style={{gap:10}}>
+              <Text style={{color:colors.ink,fontWeight:'700'}}>Atividades vinculadas ({linkedHabits.data.length})</Text>
+              <Text style={{color:colors.muted,lineHeight:20}}>Estas atividades podem estar agendadas para outros dias. Remova-as abaixo para liberar a área.</Text>
+              <ScrollView style={{maxHeight:220}}>
+                {linkedHabits.data.map(habit => <View key={habit.id} style={{paddingVertical:12,borderBottomWidth:1,borderColor:colors.border,gap:5}}>
+                  <Text style={{color:colors.ink,fontWeight:'600'}}>{habit.name}</Text>
+                  <Text style={{color:colors.muted,fontSize:12}}>{habit.scheduledDays.map(day=>dayLabels[weekDays.indexOf(day)] ?? day).join(', ')} · {(habit.dayPeriods ?? [habit.dayPeriod]).map(period=>periods.find(label=>periodValues[label]===period)).join(' e ')}</Text>
+                  {(habit.dayPeriods ?? [habit.dayPeriod]).map(period=><Pressable key={period} disabled={areaBusy} onPress={() => linkedDeletion.mutate({id:habit.id,period})} style={{paddingVertical:10,alignSelf:'flex-start'}} accessibilityLabel={'Excluir '+habit.name+' do turno '+(periods.find(label=>periodValues[label]===period) ?? period)}><Text style={{color:colors.danger,fontWeight:'600'}}>{linkedDeletion.isPending && linkedDeletion.variables?.id===habit.id && linkedDeletion.variables?.period===period ? 'Excluindo...' : 'Excluir: '+(periods.find(label=>periodValues[label]===period) ?? period)}</Text></Pressable>)}
+                </View>)}
+              </ScrollView>
+            </View> : <Text style={{color:colors.muted}}>Nenhuma atividade vinculada. Você pode excluir a área.</Text>}
+            {linkedDeletion.error ? <Text accessibilityRole="alert" style={{color:colors.danger}}>{linkedDeletion.error.message}</Text> : null}
             {areaDeletion.error ? <Text accessibilityRole="alert" style={{color:colors.danger}}>{areaDeletion.error.message}</Text> : null}
             <View style={{flexDirection:'row',gap:12}}>
-              <Pressable disabled={areaDeletion.isPending} onPress={() => setDeletingArea(null)} style={{flex:1,padding:14,alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:8}}><Text style={{color:colors.ink,fontWeight:'700'}}>Cancelar</Text></Pressable>
-              <Pressable disabled={areaDeletion.isPending} onPress={() => {if(deletingArea)areaDeletion.mutate(deletingArea.id);}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{areaDeletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
+              <Pressable disabled={areaBusy} onPress={() => setDeletingArea(null)} style={{flex:1,padding:14,alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:8}}><Text style={{color:colors.ink,fontWeight:'700'}}>Cancelar</Text></Pressable>
+              <Pressable disabled={areaBusy || linkedHabits.isPending || linkedHabits.isError || !!linkedHabits.data?.length} onPress={() => {if(deletingArea)areaDeletion.mutate(deletingArea.id);}} style={{flex:1,padding:14,alignItems:'center',backgroundColor:'#BC3831',borderRadius:8,opacity:areaBusy || linkedHabits.isPending || linkedHabits.isError || linkedHabits.data?.length ? 0.45 : 1}}><Text style={{color:'#FFFFFF',fontWeight:'700'}}>{areaDeletion.isPending?'Excluindo...':'Excluir'}</Text></Pressable>
             </View>
           </View>
         </View>

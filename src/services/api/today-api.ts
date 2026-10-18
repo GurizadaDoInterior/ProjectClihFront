@@ -110,3 +110,9 @@ export async function deleteHabit(habitId: string, dayPeriod?: import('./contrac
 export async function deleteArea(areaId: string) {
   await request(`/areas/${encodeURIComponent(areaId)}`, { method: 'DELETE' });
 }
+
+export type LinkedAreaHabit = {id:string; areaId:string; name:string; active:boolean; scheduledDays:string[]; dayPeriod:import('./contracts').DayPeriod; dayPeriods?:import('./contracts').DayPeriod[]};
+export async function getAreaHabits(areaId:string) {
+  const habits=await request<LinkedAreaHabit[]>('/habits');
+  return habits.filter(habit=>habit.active && habit.areaId===areaId);
+}

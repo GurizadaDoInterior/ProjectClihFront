@@ -328,3 +328,15 @@ test('deleting a period targets only that period on the original habit', async (
   };
   await deleteHabit('h','MORNING');
 });
+test('area deletion checks linked habits across the full schedule, not only today', async () => {
+  const {getAreaHabits}=require('../src/services/api/today-api.ts');
+  global.fetch=async(url) => {
+    assert.equal(url,'http://localhost:8080/api/v1/habits');
+    return Response.json([
+      {id:'other-day',areaId:'study',name:'Estudar',active:true,scheduledDays:['MONDAY'],dayPeriod:'EVENING'},
+      {id:'inactive',areaId:'study',name:'Antiga',active:false,scheduledDays:['MONDAY']},
+      {id:'another-area',areaId:'health',name:'Caminhar',active:true,scheduledDays:['MONDAY']},
+    ]);
+  };
+  assert.deepEqual((await getAreaHabits('study')).map(h=>h.id),['other-day']);
+});
