@@ -91,7 +91,7 @@ const getStyles = (colors: Palette) => themedStyles({
   add: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.ink, borderRadius: 8 },
   addText: { fontSize: 11, fontWeight: '700', color: colors.ink, letterSpacing: 0.7 },
   demo: { color: colors.muted, fontSize: 9, letterSpacing: 1, marginBottom: 16 },
-  streakHero: { flexDirection:'row', alignItems:'center', alignSelf:'flex-end', width:'100%', maxWidth:640, minHeight:230, paddingLeft:12, paddingTop:4, paddingBottom:8 },
+  streakHero: { flexDirection:'row', alignItems:'center', alignSelf:'flex-start', width:'100%', maxWidth:640, minHeight:230, paddingLeft:12, paddingTop:4, paddingBottom:8 },
   streakCopy: { flex:1.15, minWidth:0, zIndex:1, transform:[{translateX:-28}] },
   streakDays: { fontSize:94, lineHeight:100, fontWeight:'700', letterSpacing:0 },
   daysUnit: { fontSize:39, letterSpacing:-0.5 },
