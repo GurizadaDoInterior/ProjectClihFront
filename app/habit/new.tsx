@@ -176,7 +176,7 @@ export default function NewHabitScreen() {
           <Pressable
             disabled={areas.isPending || creatingArea || !newArea.trim()}
             onPress={addArea}
-            style={{marginTop:14,paddingVertical:10,alignSelf:'flex-start'}}
+            style={{marginTop:9,paddingVertical:8,alignSelf:'flex-start'}}
           >
             <Text style={styles.periodTextSelected}>
               {creatingArea ? 'Criando área...' : 'Adicionar área'}

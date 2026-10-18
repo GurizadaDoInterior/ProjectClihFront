@@ -319,3 +319,12 @@ test('completion sends the selected period to the original habit endpoint', asyn
   };
   await completeHabit('h','EVENING');
 });
+test('deleting a period targets only that period on the original habit', async () => {
+  const {deleteHabit}=require('../src/services/api/today-api.ts');
+  global.fetch=async(url,init) => {
+    assert.equal(url,'http://localhost:8080/api/v1/habits/h?dayPeriod=MORNING');
+    assert.equal(init.method,'DELETE');
+    return new Response(null,{status:204});
+  };
+  await deleteHabit('h','MORNING');
+});

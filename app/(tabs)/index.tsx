@@ -22,6 +22,8 @@ export default function TodayScreen() {
   const styles = getStyles(colors);
   const screenWidth = useWindowDimensions().width;
   const rocketSize = Math.min(270, (screenWidth - 48) * 0.58);
+  const heroWidth = Math.min(640, Math.min(screenWidth, 920) - 48);
+  const copyWidth = (heroWidth - 12) * 1.15 / 2.15;
   const metricSize = screenWidth < 480 ? 32 : 38;
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
@@ -45,13 +47,13 @@ export default function TodayScreen() {
     {isDemo ? <Text style={styles.demo}>MODO DEMONSTRAÇÃO</Text> : null}
 
     <View style={styles.streakHero}>
-      <View style={styles.streakCopy}>
+      <View style={[styles.streakCopy, {width:copyWidth + 48}]}>
         <Text style={[styles.streakDays, {color:getFlameStage(data.streakDays).color}]}>{data.streakDays} <Text style={styles.daysUnit}>{data.streakDays === 1 ? 'DIA' : 'DIAS'}</Text></Text>
         <Text style={styles.streakHeading}>EM SEQUÊNCIA.</Text>
         <Text style={styles.streakCaption}>Sua chama está crescendo. Continue abastecendo sua jornada.</Text>
         <Link href="/rocket-preview" style={[styles.streakLink,{color:getFlameStage(data.streakDays).color}]}>{getFlameStage(data.streakDays).name.toUpperCase()} / VER EVOLUÇÃO ↗</Link>
       </View>
-      <View style={styles.heroRocketSlot}>
+      <View style={[styles.heroRocketSlot, {left:12 + copyWidth,width:(heroWidth - 12) / 2.15}]}>
         <View pointerEvents="none" accessible={false} style={styles.rocketStars}>
           <TwinkleStar active={isFocused} delay={0} style={[styles.rocketStar, {left:'18%',top:'12%',fontSize:17}]}>✦</TwinkleStar>
           <TwinkleStar active={isFocused} delay={330} style={[styles.rocketStar, {right:'16%',top:'19%',fontSize:10,opacity:0.65}]}>✧</TwinkleStar>
@@ -92,13 +94,13 @@ const getStyles = (colors: Palette) => themedStyles({
   addText: { fontSize: 11, fontWeight: '700', color: colors.ink, letterSpacing: 0.7 },
   demo: { color: colors.muted, fontSize: 9, letterSpacing: 1, marginBottom: 16 },
   streakHero: { flexDirection:'row', alignItems:'center', alignSelf:'flex-start', width:'100%', maxWidth:640, minHeight:230, paddingLeft:12, paddingTop:4, paddingBottom:8 },
-  streakCopy: { flex:1.15, minWidth:0, zIndex:1, transform:[{translateX:-16}] },
+  streakCopy: { minWidth:0, zIndex:1, marginLeft:-8, transform:[{translateX:-16}] },
   streakDays: { fontSize:94, lineHeight:100, fontWeight:'700', letterSpacing:0 },
   daysUnit: { fontSize:39, letterSpacing:-0.5 },
   streakHeading: { fontSize:30, lineHeight:35, fontWeight:'700', letterSpacing:1.2, color:colors.ink },
   streakCaption: { fontSize:14, lineHeight:21, color:colors.muted, marginTop:5 },
   streakLink: { fontSize:11, fontWeight:'700', letterSpacing:0.5, paddingVertical:12 },
-  heroRocketSlot: { flex:1, minWidth:0, height:230, alignItems:'center', justifyContent:'center' },
+  heroRocketSlot: { position:'absolute', top:4, height:230, alignItems:'center', justifyContent:'center' },
   heroRocket: { transform:[{translateX:-8},{translateY:-12}] },
   rocketStars: { position:'absolute', width:'100%', height:'100%', transform:[{translateX:-8},{translateY:-12}] },
   rocketStar: { position:'absolute', color:colors.orange, fontWeight:'400' },

@@ -103,9 +103,9 @@ export async function resolveHabitArea(selectedId: string, newName: string, avai
   return id;
 }
 
-export async function deleteHabit(habitId: string) {
+export async function deleteHabit(habitId: string, dayPeriod?: import('./contracts').DayPeriod) {
   if (isDemo) { demo = { ...demo, activities: demo.activities.filter(item => item.id !== habitId) }; return; }
-  await request(`/habits/${encodeURIComponent(habitId)}`, { method: 'DELETE' });
+  await request(`/habits/${encodeURIComponent(habitId)}${dayPeriod ? `?dayPeriod=${encodeURIComponent(dayPeriod)}` : ''}`, { method: 'DELETE' });
 }
 export async function deleteArea(areaId: string) {
   await request(`/areas/${encodeURIComponent(areaId)}`, { method: 'DELETE' });
