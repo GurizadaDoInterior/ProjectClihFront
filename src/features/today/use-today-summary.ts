@@ -1,16 +1,21 @@
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRef, useState } from 'react';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { completeHabit, undoHabit, getTodaySummary } from '@/src/services/api/today-api';
 import type { DailyActivity, TodaySummary } from '@/src/types/today';
+
+import {completionXp, previewXp} from './optimistic-xp';
 
 const todayKey = ['today'] as const;
 
 export function useTodaySummary() {
   const queryClient = useQueryClient();
+  const locked = useRef(false);
+  const pending = useIsMutating({mutationKey:['habit-toggle']});
   const [xpReward, setXpReward] = useState<{ habitId: string; amount: number; eventId: number } | null>(null);
   const query = useQuery({ queryKey: todayKey, queryFn: getTodaySummary, staleTime: 30_000, refetchInterval: 60_000 });
   const toggleMutation = useMutation({
+    mutationKey:['habit-toggle'],
     mutationFn: async (activity: DailyActivity) => {
       if (activity.completed) {
         await undoHabit(activity.habitId ?? activity.id, activity.completionId);
@@ -33,22 +38,21 @@ export function useTodaySummary() {
           activities: current.activities.map(item => item.id === activity.id ? { ...item, completed: true, completionId: result.id, xpAwarded: result.xpAwarded } : item),
         } : current);
       }
-      if (!activity.completed && result && result.xpAwarded > 0 && !result.idempotentReplay) {
+      if (!activity.completed && result && result.xpAwarded > 0 && result.xpAwarded !== completionXp(activity) && !result.idempotentReplay) {
         setXpReward({ habitId: activity.id, amount: result.xpAwarded, eventId: Date.now() });
       }
     },
     onMutate: async (selected) => {
       setXpReward(null);
-      await queryClient.cancelQueries({ queryKey: todayKey });
+      void queryClient.cancelQueries({ queryKey: todayKey });
       const previous = queryClient.getQueryData<TodaySummary>(todayKey);
-      if (selected.completed && (selected.xpAwarded ?? 0) > 0) {
-        setXpReward({ habitId: selected.id, amount: -selected.xpAwarded!, eventId: Date.now() });
-      }
+      const delta = selected.completed ? -(selected.xpAwarded ?? 0) : completionXp(selected);
+      if (delta) setXpReward({ habitId:selected.id, amount:delta, eventId:Date.now() });
 
       queryClient.setQueryData<TodaySummary>(todayKey, (current) => {
         if (!current) return current;
         return {
-          ...current,
+          ...previewXp(current, delta),
           activities: current.activities.map((activity) =>
             activity.id === selected.id ? { ...activity, completed: !selected.completed } : activity,
           ),
@@ -62,6 +66,7 @@ export function useTodaySummary() {
       if (context?.previous) queryClient.setQueryData(todayKey, context.previous);
     },
     onSettled: () => {
+      locked.current=false;
       void queryClient.invalidateQueries({ queryKey: todayKey });
       void queryClient.invalidateQueries({ queryKey: ['day-history'] });
       void queryClient.invalidateQueries({ queryKey: ['calendar-activities'] });
@@ -73,9 +78,9 @@ export function useTodaySummary() {
     xpReward,
     toggleActivity: (id: string) => {
       const activity = query.data?.activities.find((item) => item.id === id);
-      if (!toggleMutation.isPending && activity) toggleMutation.mutate(activity);
+      if (!locked.current && !pending && activity) { locked.current=true; toggleMutation.mutate(activity); }
     },
     completionError: toggleMutation.error,
-    isToggling: toggleMutation.isPending,
+    isToggling: pending > 0,
   };
 }
