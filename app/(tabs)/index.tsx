@@ -21,8 +21,8 @@ export default function TodayScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const screenWidth = useWindowDimensions().width;
-  const rocketSize = Math.min(305, screenWidth * 0.65);
-  const metricSize = screenWidth < 480 ? 48 : 64;
+  const rocketSize = Math.min(270, (screenWidth - 48) * 0.58);
+  const metricSize = screenWidth < 480 ? 32 : 38;
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
   if (isError || !data) return <AppScreen>
@@ -66,8 +66,10 @@ export default function TodayScreen() {
 
     <View style={styles.metrics}>
       <View style={[styles.metric, styles.streakMetric]}><View style={styles.metricValue}><Text style={[styles.metricNumber,styles.metricNumberLarge,{fontSize:metricSize}]}>{String(completed).padStart(2,'0')} <Text style={styles.activityTotal}>/ {String(total).padStart(2,'0')}</Text></Text></View><Text style={styles.metricLabel}>ATIVIDADES CONCLUÍDAS</Text></View>
-      <View style={[styles.metric, styles.metricMiddle]}><View style={styles.metricValue}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={[styles.metricNumber, styles.metricNumberLarge, {fontSize:metricSize}]}>{data.level}</Text></View><Text style={styles.metricLabel}>NÍVEL</Text><View style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View></View>
-      <View style={[styles.metric, styles.xpMetric]}><View style={styles.metricValue}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[styles.metricNumber, styles.metricNumberLarge, {fontSize:metricSize}]}>{data.xp.toLocaleString('pt-BR')}</Text></View><Text style={styles.metricLabel}>XP ACUMULADO</Text></View>
+      <View style={[styles.metric, styles.metricMiddle]}>
+        <View style={styles.levelHeading}><Text style={styles.levelTitle}>NÍVEL {data.level}</Text><Text style={styles.levelXp}>{(data.xpInLevel ?? data.xp).toLocaleString('pt-BR')} / {data.xpToNextLevel.toLocaleString('pt-BR')} XP</Text></View>
+        <View accessibilityRole="progressbar" accessibilityLabel="Progresso do nível" accessibilityValue={{ min: 0, max: 100, now: Math.round(xpPercent) }} style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View>
+      </View>
     </View>
 
     <View style={styles.sectionLine}><Text style={styles.section}>NA SUA LISTA</Text><Link href="/routine" style={styles.textLink}>VER ROTINA ↗</Link></View>
@@ -89,29 +91,31 @@ const getStyles = (colors: Palette) => themedStyles({
   add: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.ink, borderRadius: 8 },
   addText: { fontSize: 11, fontWeight: '700', color: colors.ink, letterSpacing: 0.7 },
   demo: { color: colors.muted, fontSize: 9, letterSpacing: 1, marginBottom: 16 },
-  streakHero: { flexDirection:'row', alignItems:'center', width:'100%', maxWidth:520, marginLeft:16, minHeight:245, paddingTop:4, paddingBottom:8 },
-  streakCopy: { flex:1.2, minWidth:0, zIndex:1, transform:[{translateX:20}] },
-  streakDays: { fontSize:108, lineHeight:110, fontWeight:'700', letterSpacing:0 },
-  daysUnit: { fontSize:46, letterSpacing:-0.5 },
-  streakHeading: { fontSize:34, lineHeight:38, fontWeight:'700', letterSpacing:1.2, color:colors.ink },
-  streakCaption: { fontSize:16, lineHeight:23, color:colors.muted, marginTop:5 },
-  streakLink: { fontSize:13, fontWeight:'700', letterSpacing:0.5, paddingVertical:12 },
+  streakHero: { flexDirection:'row', alignItems:'center', alignSelf:'flex-end', width:'100%', maxWidth:640, minHeight:230, paddingLeft:12, paddingTop:4, paddingBottom:8 },
+  streakCopy: { flex:1.15, minWidth:0, zIndex:1 },
+  streakDays: { fontSize:78, lineHeight:84, fontWeight:'700', letterSpacing:0 },
+  daysUnit: { fontSize:32, letterSpacing:-0.5 },
+  streakHeading: { fontSize:26, lineHeight:30, fontWeight:'700', letterSpacing:1.2, color:colors.ink },
+  streakCaption: { fontSize:14, lineHeight:21, color:colors.muted, marginTop:5 },
+  streakLink: { fontSize:11, fontWeight:'700', letterSpacing:0.5, paddingVertical:12 },
   heroRocketSlot: { flex:1, minWidth:0, height:230, alignItems:'center', justifyContent:'center' },
-  heroRocket: { transform:[{translateX:-54},{translateY:-25}] },
-  rocketStars: { position:'absolute', width:'100%', height:'100%', transform:[{translateX:-54},{translateY:-25}] },
+  heroRocket: { transform:[{translateX:-8},{translateY:-12}] },
+  rocketStars: { position:'absolute', width:'100%', height:'100%', transform:[{translateX:-8},{translateY:-12}] },
   rocketStar: { position:'absolute', color:colors.orange, fontWeight:'400' },
   activityTotal: { fontSize:22, color:colors.muted },
   metrics: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 18, marginBottom: 4 },
   metric: { flex: 1, minWidth: 0, paddingHorizontal: 8 },
-  streakMetric: { flex: 1.65, paddingHorizontal: 0 },
-  metricValue: { height: 65, justifyContent: 'center', alignItems: 'flex-start' },
-  metricMiddle: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border },
+  streakMetric: { flex: 1, paddingHorizontal: 0 },
+  metricValue: { height: 44, justifyContent: 'center', alignItems: 'flex-start' },
+  metricMiddle: { flex: 1.35, borderLeftWidth: 1, borderColor: colors.border, paddingLeft: 18, justifyContent: 'center' },
   metricNumber: { color: colors.ink, fontSize: 29, fontWeight: '700' },
-  metricNumberLarge: { fontSize: 64, lineHeight: 76, width: '100%', letterSpacing: -1 },
-  xpMetric: { flex: 1.2 },
+  metricNumberLarge: { fontSize: 38, lineHeight: 46, width: '100%', letterSpacing: -1 },
+  levelHeading: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 },
+  levelTitle: { color: colors.ink, fontSize: 16, fontWeight: '700' },
+  levelXp: { color: colors.muted, fontSize: 11, fontWeight: '600' },
   metricUnit: { color: colors.muted, fontSize: 12, fontWeight: '700' },
   metricLabel: { color: colors.muted, fontSize: 10, fontWeight: '700', letterSpacing: 0.6, marginTop: 3 },
-  levelTrack: { height: 6, backgroundColor: colors.border, marginTop: 6, width: '90%' },
+  levelTrack: { height: 8, borderRadius: 4, overflow: 'hidden', backgroundColor: colors.border, marginTop: 10, width: '100%' },
   levelFill: { height: '100%', backgroundColor: colors.orange },
   sectionLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: colors.ink, paddingBottom: 12, marginTop: 18 },
   section: { fontSize: 24, fontWeight: '700', color: colors.ink, letterSpacing: 0.5 },
