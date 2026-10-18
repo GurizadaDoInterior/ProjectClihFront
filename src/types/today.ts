@@ -2,6 +2,8 @@ export type AreaKey = 'study' | 'health' | 'reading' | 'sleep';
 
 export type DailyActivity = {
   id: string;
+  habitId?: string;
+  completionPeriod?: import('../services/api/contracts').DayPeriod;
   title: string;
   target: string;
   area: AreaKey;

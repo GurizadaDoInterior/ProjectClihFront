@@ -13,10 +13,10 @@ export function useTodaySummary() {
   const toggleMutation = useMutation({
     mutationFn: async (activity: DailyActivity) => {
       if (activity.completed) {
-        await undoHabit(activity.id, activity.completionId);
+        await undoHabit(activity.habitId ?? activity.id, activity.completionId);
         return undefined;
       }
-      return completeHabit(activity.id);
+      return completeHabit(activity.habitId ?? activity.id, activity.completionPeriod);
     },
     onSuccess: (result, activity) => {
       if (!activity.completed && result) {

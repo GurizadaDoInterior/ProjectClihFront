@@ -46,7 +46,7 @@ function ProfileForm({ user }: { user: User }) {
     if (
       name.trim().length < 2 ||
       name.trim().length > 80 ||
-      (handle && !/^[a-z0-9._]{3,30}$/.test(handle))
+      (!/^[a-z0-9._]{3,30}$/.test(handle))
     ) {
       setError(
         'Use um nome com 2 a 80 caracteres e um usuário com 3 a 30 letras, números, pontos ou sublinhados.',
@@ -64,7 +64,7 @@ function ProfileForm({ user }: { user: User }) {
     try {
       const updated = await updateMe({
         displayName: name.trim(),
-        username: handle || undefined,
+        username: handle,
         timezoneId: timezone.trim(),
         completeOnboarding: true,
       });
@@ -92,7 +92,7 @@ function ProfileForm({ user }: { user: User }) {
         onChangeText={setName}
         maxLength={80}
       />
-      <Text style={styles.label}>Usuário (opcional)</Text>
+      <Text style={styles.label}>Usuário (obrigatório)</Text>
       <TextInput placeholderTextColor={colors.muted}
         accessibilityLabel="Nome de usuário"
         style={styles.input}

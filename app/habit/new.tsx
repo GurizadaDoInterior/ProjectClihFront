@@ -176,6 +176,7 @@ export default function NewHabitScreen() {
           <Pressable
             disabled={areas.isPending || creatingArea || !newArea.trim()}
             onPress={addArea}
+            style={{marginTop:14,paddingVertical:10,alignSelf:'flex-start'}}
           >
             <Text style={styles.periodTextSelected}>
               {creatingArea ? 'Criando área...' : 'Adicionar área'}
@@ -231,6 +232,7 @@ export default function NewHabitScreen() {
         ))}
       </View>
       <Text style={styles.label}>Dias da semana</Text>
+      <Text style={styles.scheduleHint}>Repete toda semana nos dias escolhidos, até você excluir a atividade.</Text>
       <View style={styles.periods}>
         {weekDays.map((day, index) => (
           <Pressable
@@ -249,7 +251,7 @@ export default function NewHabitScreen() {
         ))}
       </View>
       <Text style={styles.label}>Período</Text>
-      <Text style={styles.intro}>Escolha um ou mais turnos. A atividade é concluída uma única vez por dia.</Text>
+      <Text style={styles.intro}>Escolha um ou mais turnos. Cada turno tem sua própria conclusão.</Text>
       <View style={styles.periods}>
         {periods.map(label => {
           const period = periodValues[label];
@@ -293,6 +295,7 @@ export default function NewHabitScreen() {
 
 const getStyles = (colors: Palette) => themedStyles({
   intro: { color: colors.muted, fontSize: 15, lineHeight: 22, paddingTop: 14, marginBottom: 26 },
+  scheduleHint: { color: colors.muted, fontSize: 13, lineHeight: 20, marginBottom: 12 },
   field: { marginBottom: 21 },
   label: { color: colors.ink, fontSize: 14, fontWeight: '700', marginBottom: 9 },
   input: {

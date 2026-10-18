@@ -50,6 +50,7 @@ export type TodayResponse = {
     unit: string | null;
     dayPeriod: DayPeriod;
     dayPeriods?: DayPeriod[];
+    completionPeriod?: DayPeriod;
     preferredTime: string | null;
     completed: boolean;
     completionId?: string | null;

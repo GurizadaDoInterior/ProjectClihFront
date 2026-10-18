@@ -301,3 +301,21 @@ test('area deletion preserves server feedback for linked activities', async () =
   global.fetch = async () => Response.json({message:'Remova as atividades desta área primeiro.'}, {status:409});
   await assert.rejects(deleteArea('linked'), /Remova as atividades/);
 });
+test('separate periods keep separate row and completion identities', () => {
+  const rows = mapToday({ ...today, habits: [
+    { ...today.habits[0], dayPeriod: 'MORNING', dayPeriods:['MORNING'], completionPeriod:'MORNING', completed:true,completionId:'cm' },
+    { ...today.habits[0], dayPeriod: 'EVENING', dayPeriods:['EVENING'], completionPeriod:'EVENING', completed:false,completionId:null },
+  ] }).activities;
+  assert.notEqual(rows[0].id,rows[1].id);
+  assert.equal(rows[0].habitId, rows[1].habitId);
+  assert.equal(rows[0].completed,true);
+  assert.equal(rows[1].completed,false);
+});
+test('completion sends the selected period to the original habit endpoint', async () => {
+  global.fetch=async(url,init) => {
+    assert.equal(url,'http://localhost:8080/api/v1/habits/h/completions');
+    assert.equal(JSON.parse(init.body).dayPeriod,'EVENING');
+    return Response.json({id:'ce',xpAwarded:10});
+  };
+  await completeHabit('h','EVENING');
+});

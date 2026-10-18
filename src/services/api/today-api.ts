@@ -7,7 +7,7 @@ export async function getTodaySummary() {
   if (isDemo) return JSON.parse(JSON.stringify(demo)) as typeof demoToday;
   return mapToday(await request<TodayResponse>('/today'));
 }
-export async function completeHabit(habitId: string) {
+export async function completeHabit(habitId: string, dayPeriod?: import('./contracts').DayPeriod) {
   if (isDemo) {
     demo = {
       ...demo,
@@ -24,7 +24,7 @@ export async function completeHabit(habitId: string) {
       return await request<{ id: string; xpAwarded: number; idempotentReplay: boolean; progress: Progress }>(`/habits/${habitId}/completions`, {
         method: 'POST',
         headers: { 'Idempotency-Key': idempotencyKey },
-        body: JSON.stringify({ completedAt }),
+        body: JSON.stringify({ completedAt, ...(dayPeriod ? {dayPeriod} : {}) }),
       });
       return;
     } catch (error) {

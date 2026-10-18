@@ -24,7 +24,9 @@ export function mapToday(response: TodayResponse): TodaySummary {
     areaBalance: { study: 0, health: 0, reading: 0, sleep: 0 },
     areas: response.areaProgress.map((item) => ({ ...item.area, value: item.progressPercentage })),
     activities: response.habits.map((habit) => ({
-      id: habit.id,
+      id: habit.completionPeriod ? `${habit.id}:${habit.completionPeriod}` : habit.id,
+      habitId: habit.id,
+      completionPeriod: habit.completionPeriod,
       title: habit.name,
       target:
         habit.measurementType === 'BOOLEAN'
