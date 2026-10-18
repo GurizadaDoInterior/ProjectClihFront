@@ -1,6 +1,7 @@
+import {AppText as Text} from '@/src/components/app-text';
 import {MotionPressable as Pressable} from '@/src/components/motion-pressable';
 import {useRef,useState} from 'react';
-import {Image,Text,View} from 'react-native';
+import {Image,View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import {useQueryClient} from '@tanstack/react-query';

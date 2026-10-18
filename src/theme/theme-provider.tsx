@@ -1,3 +1,4 @@
+import {textFont} from './typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { StyleSheet, useColorScheme, type TextStyle, type ViewStyle, type ImageStyle } from 'react-native';
@@ -31,9 +32,8 @@ export const useTheme = () => useContext(ThemeContext);
 export function themedStyles<T extends Record<string, ViewStyle | TextStyle | ImageStyle>>(styles: T): T {
   const result = Object.fromEntries(Object.entries(styles).map(([key, value]) => {
     const text = value as TextStyle;
-    const weight = Number(text.fontWeight ?? 400);
     return [key, ('fontSize' in text || 'fontWeight' in text || 'lineHeight' in text || 'color' in text)
-      ? { ...text, fontFamily: text.fontFamily ?? ((text.fontSize ?? 0) >= 20 ? (weight >= 700 ? 'BarlowBold' : 'Barlow') : weight >= 700 ? 'SourceSansBold' : weight >= 500 ? 'SourceSansSemiBold' : 'SourceSans'), fontWeight: 'normal' as const }
+      ? { ...text, fontFamily: text.fontFamily ?? textFont(text.fontSize,text.fontWeight), fontWeight: 'normal' as const }
       : value];
   }));
   return StyleSheet.create(result as T);

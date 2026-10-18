@@ -23,3 +23,10 @@ test('XP and level bar respond immediately across level boundaries and undo',()=
  const down=previewXp(up,-10);assert.equal(down.xp,90);assert.equal(down.level,1);assert.equal(down.xpInLevel,90);
  const zero=previewXp({...summary,xp:0,xpInLevel:0},-10);assert.equal(zero.xp,0);assert.equal(zero.level,1);assert.equal(zero.xpInLevel,0);
 });
+test('typography consistently uses app title and body fonts',()=>{
+ const {textFont}=require('../src/theme/typography.ts');
+ assert.equal(textFont(25,'700'),'BarlowBold');
+ assert.equal(textFont(14,'700'),'SourceSansBold');
+ assert.equal(textFont(14,'600'),'SourceSansSemiBold');
+ assert.equal(textFont(14),'SourceSans');
+});

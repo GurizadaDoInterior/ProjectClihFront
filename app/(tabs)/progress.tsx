@@ -1,3 +1,4 @@
+import {AppText as Text} from '@/src/components/app-text';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useState } from 'react';
 import { SmoothReveal } from '@/src/components/smooth-reveal';
@@ -7,7 +8,7 @@ import { SleepHistory, dateKey, type SleepEntry } from '@/src/components/sleep-h
 import { request } from '@/src/services/api/client';
 import { mapToday } from '@/src/services/api/today-mapper';
 import type { TodayResponse } from '@/src/services/api/contracts';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { AreaRadar } from '@/src/components/area-radar';
 import { WeekStrip } from '@/src/components/week-strip';
@@ -37,6 +38,9 @@ export default function ProgressScreen() {
   });
   if (!data) return <AppScreen><Pressable onPress={() => refetch()}><Text style={styles.sub}>{error ? error.message + ' Toque para tentar novamente.' : 'Carregando evolução...'}</Text></Pressable></AppScreen>;
   const areas = data.areas ?? Object.entries(data.areaBalance).map(([id, value]) => ({ id, name: ({study:'Estudo',health:'Saúde',reading:'Leitura',sleep:'Sono'} as Record<string,string>)[id], value: Math.round(value * 100), color: colors.primary }));
+  const selectedStats=day.data?.week.find(item=>item.date===selected);
+  const visibleCompleted=day.data?.activities.filter(item=>item.completed).length ?? 0;
+  const hiddenCompletions=Math.max(0,(selectedStats?.completed ?? 0)-visibleCompleted);
   const weekly = data.activities.filter(activity => activity.completed).length;
   return <AppScreen>
     <Text style={styles.eyebrow}>SEU DESEMPENHO</Text><Text style={styles.title}>EVOLUÇÃO.</Text>
@@ -55,7 +59,8 @@ export default function ProgressScreen() {
     {sleep.isPending ? <Text style={styles.sub}>Carregando calendário...</Text> : sleep.isError ? <Pressable onPress={() => sleep.refetch()}><Text style={styles.sub}>Não foi possível carregar o sono. Toque para tentar novamente.</Text></Pressable> : <SleepHistory overview activities={monthActivities.isPlaceholderData ? undefined : monthActivities.data} dayDetails={<View style={{ marginTop: 24, padding: 16, borderWidth: 1, borderColor: colors.border, borderRadius: 8, gap: 10 }}>
       <Text style={{color:colors.ink,fontWeight:'700',fontSize:18}}>ATIVIDADES • {selected.split('-').reverse().join('/')}</Text>
       {day.isPending ? <Text style={styles.sub}>Carregando atividades do dia...</Text> : day.isError ? <Pressable onPress={() => day.refetch()}><Text style={styles.sub}>Não foi possível carregar. Toque para tentar novamente.</Text></Pressable> : <>
-        <Text style={styles.sub}>{day.data?.activities.filter(item => item.completed).length ?? 0} de {day.data?.activities.length ?? 0} atividades concluídas</Text>
+        <Text style={styles.sub}>{selectedStats?.completed ?? visibleCompleted} de {selectedStats?.planned ?? day.data?.activities.length ?? 0} atividades concluídas</Text>
+        {hiddenCompletions>0 ? <Text style={styles.sub}>{hiddenCompletions} conclusão(ões) de atividades já excluídas da rotina. O histórico desses dias foi mantido.</Text> : null}
         {day.data?.activities.map(item => <View key={item.id} style={{flexDirection:'row',gap:10,alignItems:'center'}}><Text style={{color:item.completed?colors.success:colors.muted}}>{item.completed?'✓':'○'}</Text><View style={{flex:1}}><Text style={{color:colors.ink}}>{item.title}</Text><Text style={styles.sub}>{item.target}</Text></View><Text style={{color:colors.muted,fontSize:11}}>{item.completed?'FEITO':'PENDENTE'}</Text></View>)}
         {!day.data?.activities.length ? <Text style={styles.sub}>Nenhuma atividade programada para esse dia.</Text> : null}
       </>}

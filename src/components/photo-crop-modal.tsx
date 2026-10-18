@@ -1,5 +1,6 @@
+import {AppText as Text} from '@/src/components/app-text';
 import {useEffect,useRef,useState} from 'react';
-import {Animated,Image,Modal,PanResponder,Platform,Text,View,useWindowDimensions} from 'react-native';
+import {Animated,Image,Modal,PanResponder,Platform,View,useWindowDimensions} from 'react-native';
 import {MotionPressable as Pressable} from './motion-pressable';
 import {PhotoZoom} from './photo-zoom';
 import {constrainPhoto,photoCrop,type CropImage} from './photo-crop';

@@ -1,8 +1,9 @@
+import {AppText as Text} from '@/src/components/app-text';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import { TimezoneSelect } from '@/src/components/timezone-select';
 import { ProfilePhotoEditor } from '@/src/components/profile-photo-editor';
 import { AppScreen } from '@/src/components/app-screen';

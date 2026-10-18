@@ -1,4 +1,5 @@
-import {Text,View} from 'react-native';
+import {AppText as Text} from '@/src/components/app-text';
+import {View} from 'react-native';
 import {MotionPressable as Pressable} from './motion-pressable';
 import {useTheme} from '@/src/theme/theme-provider';
 export function PhotoZoom({value,onChange,disabled}:{value:number;onChange:(value:number)=>void;disabled:boolean}) {

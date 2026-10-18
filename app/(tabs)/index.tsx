@@ -1,3 +1,4 @@
+import {LevelFill} from '@/src/components/level-fill';
 import { RocketFlight } from '@/src/components/rocket-flight';
 import { TwinkleStar } from '@/src/components/twinkle-star';
 import { useCallback, useState } from 'react';
@@ -70,7 +71,7 @@ export default function TodayScreen() {
       <View style={[styles.metric, styles.streakMetric]}><View style={styles.metricValue}><Text style={[styles.metricNumber,styles.metricNumberLarge,{fontSize:metricSize}]}>{String(completed).padStart(2,'0')} <Text style={styles.activityTotal}>/ {String(total).padStart(2,'0')}</Text></Text></View><Text style={styles.metricLabel}>ATIVIDADES CONCLUÍDAS</Text></View>
       <View style={[styles.metric, styles.metricMiddle]}>
         <View style={styles.levelHeading}><Text style={styles.levelTitle}>NÍVEL {data.level}</Text><Text style={styles.levelXp}>{(data.xpInLevel ?? data.xp).toLocaleString('pt-BR')} / {data.xpToNextLevel.toLocaleString('pt-BR')} XP</Text></View>
-        <View accessibilityRole="progressbar" accessibilityLabel="Progresso do nível" accessibilityValue={{ min: 0, max: 100, now: Math.round(xpPercent) }} style={styles.levelTrack}><View style={[styles.levelFill, { width: `${xpPercent}%` }]} /></View>
+        <View accessibilityRole="progressbar" accessibilityLabel="Progresso do nível" accessibilityValue={{ min: 0, max: 100, now: Math.round(xpPercent) }} style={styles.levelTrack}><LevelFill percent={xpPercent} color={colors.orange}/></View>
       </View>
     </View>
 

@@ -20,6 +20,7 @@ export type WeekDay = {
   label: string;
   state: 'complete' | 'partial' | 'current' | 'empty';
   completed?: number;
+  planned?: number;
   date?: string;
 };
 
