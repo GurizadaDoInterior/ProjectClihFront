@@ -12,8 +12,8 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
   const edge = '#20365D';
   const accent = power >= 3 ? stage.color : '#EF563D';
   return <View accessible accessibilityRole="image" accessibilityLabel={`Foguete: ${stage.name}, ${days} dias em sequência`}>
-    <Svg width={size} height={size} viewBox="-10 -6 72 76">
-      <G transform="rotate(-42 22 30)">
+    <Svg width={size} height={size} viewBox="-34 -22 104 104">
+      <G transform="rotate(55 22 30)">
         {power >= 2 ? <Circle cx={22} cy={28} r={16 + power * 0.6} fill={stage.color} opacity={0.018 * power} /> : null}
         <G transform={`translate(22 36) scale(${flameWidth} ${flameLength}) translate(-22 -36)`}>
           {power >= 2 ? <Path d={plume} fill={stage.color} stroke={stage.color} strokeWidth={2 + power * 0.5} strokeLinejoin="round" opacity={0.08 + power * 0.012} /> : null}
