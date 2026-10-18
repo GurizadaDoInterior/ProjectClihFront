@@ -1,7 +1,10 @@
+import { RocketFlight } from '@/src/components/rocket-flight';
+import { TwinkleStar } from '@/src/components/twinkle-star';
+import { useCallback, useState } from 'react';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
-import { Link } from 'expo-router';
+import { Link, useFocusEffect } from 'expo-router';
 import { Platform, Text, View, useWindowDimensions } from 'react-native';
 import { ActivityRow } from '@/src/components/activity-row';
 import { AppScreen } from '@/src/components/app-screen';
@@ -13,10 +16,12 @@ import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider
 import { isDemo } from '@/src/services/api/client';
 
 export default function TodayScreen() {
+  const [isFocused, setIsFocused] = useState(false);
+  useFocusEffect(useCallback(() => { setIsFocused(true); return () => setIsFocused(false); }, []));
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const screenWidth = useWindowDimensions().width;
-  const rocketSize = screenWidth < 360 ? 190 : 230;
+  const rocketSize = Math.min(305, screenWidth * 0.65);
   const metricSize = screenWidth < 480 ? 48 : 64;
   const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
@@ -43,11 +48,18 @@ export default function TodayScreen() {
       <View style={styles.streakCopy}>
         <Text style={[styles.streakDays, {color:getFlameStage(data.streakDays).color}]}>{data.streakDays} <Text style={styles.daysUnit}>{data.streakDays === 1 ? 'DIA' : 'DIAS'}</Text></Text>
         <Text style={styles.streakHeading}>EM SEQUÊNCIA.</Text>
-        <Text style={styles.streakCaption}>Sua chama está crescendo.{'\n'}Continue abastecendo sua jornada.</Text>
+        <Text style={styles.streakCaption}>Sua chama está crescendo. Continue abastecendo sua jornada.</Text>
         <Link href="/rocket-preview" style={[styles.streakLink,{color:getFlameStage(data.streakDays).color}]}>{getFlameStage(data.streakDays).name.toUpperCase()} / VER EVOLUÇÃO ↗</Link>
       </View>
       <View style={styles.heroRocketSlot}>
-        <Link href="/rocket-preview" asChild><Pressable accessibilityRole="button" accessibilityLabel={`Ver evolução do foguete. Fase atual: ${getFlameStage(data.streakDays).name}`} style={({pressed}) => [styles.heroRocket,{opacity:pressed ? 0.7 : 1}]}><StreakRocket days={data.streakDays} size={rocketSize} /></Pressable></Link>
+        <View pointerEvents="none" accessible={false} style={styles.rocketStars}>
+          <TwinkleStar active={isFocused} delay={0} style={[styles.rocketStar, {left:'18%',top:'12%',fontSize:17}]}>✦</TwinkleStar>
+          <TwinkleStar active={isFocused} delay={330} style={[styles.rocketStar, {right:'16%',top:'19%',fontSize:10,opacity:0.65}]}>✧</TwinkleStar>
+          <TwinkleStar active={isFocused} delay={660} style={[styles.rocketStar, {left:'8%',top:'56%',fontSize:9,opacity:0.6}]}>✦</TwinkleStar>
+          <TwinkleStar active={isFocused} delay={990} style={[styles.rocketStar, {right:'10%',bottom:'18%',fontSize:13,opacity:0.75}]}>✦</TwinkleStar>
+          <TwinkleStar active={isFocused} delay={1320} style={[styles.rocketStar, {left:'32%',bottom:'8%',fontSize:8,opacity:0.55}]}>✧</TwinkleStar>
+        </View>
+        <Link href="/rocket-preview" asChild><Pressable accessibilityRole="button" accessibilityLabel={`Ver evolução do foguete. Fase atual: ${getFlameStage(data.streakDays).name}`} style={({pressed}) => [styles.heroRocket,{opacity:pressed ? 0.7 : 1}]}><RocketFlight active={isFocused} color={getFlameStage(data.streakDays).color}><StreakRocket days={data.streakDays} size={rocketSize} animate={isFocused} /></RocketFlight></Pressable></Link>
       </View>
     </View>
     <WeekStrip days={data.week} />
@@ -77,15 +89,17 @@ const getStyles = (colors: Palette) => themedStyles({
   add: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, borderWidth: 1, borderColor: colors.ink, borderRadius: 8 },
   addText: { fontSize: 11, fontWeight: '700', color: colors.ink, letterSpacing: 0.7 },
   demo: { color: colors.muted, fontSize: 9, letterSpacing: 1, marginBottom: 16 },
-  streakHero: { flexDirection:'row', alignItems:'center', minHeight:230, paddingTop:4, paddingBottom:8 },
-  streakCopy: { flex:1.1, minWidth:0, zIndex:1 },
-  streakDays: { fontSize:86, lineHeight:94, fontWeight:'700', letterSpacing:-2 },
-  daysUnit: { fontSize:36, letterSpacing:-0.5 },
-  streakHeading: { fontSize:27, lineHeight:31, fontWeight:'700', color:colors.ink },
-  streakCaption: { fontSize:12, lineHeight:18, color:colors.muted, marginTop:8 },
-  streakLink: { fontSize:10, fontWeight:'700', letterSpacing:0.5, paddingVertical:12 },
-  heroRocketSlot: { flex:1, minWidth:0, height:210, alignItems:'center', justifyContent:'center' },
-  heroRocket: { transform:[{translateX:-24},{translateY:-35}] },
+  streakHero: { flexDirection:'row', alignItems:'center', width:'100%', maxWidth:520, marginLeft:16, minHeight:245, paddingTop:4, paddingBottom:8 },
+  streakCopy: { flex:1.2, minWidth:0, zIndex:1, transform:[{translateX:20}] },
+  streakDays: { fontSize:108, lineHeight:110, fontWeight:'700', letterSpacing:0 },
+  daysUnit: { fontSize:46, letterSpacing:-0.5 },
+  streakHeading: { fontSize:34, lineHeight:38, fontWeight:'700', letterSpacing:1.2, color:colors.ink },
+  streakCaption: { fontSize:16, lineHeight:23, color:colors.muted, marginTop:5 },
+  streakLink: { fontSize:13, fontWeight:'700', letterSpacing:0.5, paddingVertical:12 },
+  heroRocketSlot: { flex:1, minWidth:0, height:230, alignItems:'center', justifyContent:'center' },
+  heroRocket: { transform:[{translateX:-54},{translateY:-25}] },
+  rocketStars: { position:'absolute', width:'100%', height:'100%', transform:[{translateX:-54},{translateY:-25}] },
+  rocketStar: { position:'absolute', color:colors.orange, fontWeight:'400' },
   activityTotal: { fontSize:22, color:colors.muted },
   metrics: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border, paddingVertical: 18, marginBottom: 4 },
   metric: { flex: 1, minWidth: 0, paddingHorizontal: 8 },

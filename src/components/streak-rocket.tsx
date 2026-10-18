@@ -1,12 +1,35 @@
-import { View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, View } from 'react-native';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import { getFlameStage } from '@/src/features/streak/flame';
+import { useReducedMotion } from './use-reduced-motion';
 
-export function StreakRocket({ days, size = 84 }: { days: number; size?: number }) {
+const AnimatedFlame = Animated.createAnimatedComponent(G);
+
+export function StreakRocket({ days, size = 84, animate = false }: { days: number; size?: number; animate?: boolean }) {
+  const pulse = useRef(new Animated.Value(0)).current;
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    pulse.setValue(0);
+    if (!animate || reducedMotion) return;
+    const flameAnimation = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 1, duration: 380, easing: Easing.inOut(Easing.sin), useNativeDriver: false, isInteraction: false }),
+      Animated.timing(pulse, { toValue: 0, duration: 460, easing: Easing.inOut(Easing.sin), useNativeDriver: false, isInteraction: false }),
+    ]));
+    flameAnimation.start();
+    return () => { flameAnimation.stop(); pulse.setValue(0); };
+  }, [animate, reducedMotion, pulse]);
   const stage = getFlameStage(days);
   const power = Math.max(0, [0, 3, 10, 30, 50, 100, 200, 300].filter(mark => days >= mark).length - 1);
   const flameWidth = 0.85 + power * 0.075;
   const flameLength = 0.55 + power * 0.13;
+  const flameTransform = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [
+      `translate(22 36) scale(${flameWidth} ${flameLength}) translate(-22 -36)`,
+      `translate(22 36) scale(${flameWidth * 0.96} ${flameLength * 1.12}) translate(-22 -36)`,
+    ],
+  });
   const plume = 'M17 36 C13 41 16 46 15 49 C14 53 20 57 22 66 C24 57 30 53 29 49 C28 46 31 41 27 36 Z';
   const body = '#369DB5';
   const edge = '#20365D';
@@ -15,12 +38,12 @@ export function StreakRocket({ days, size = 84 }: { days: number; size?: number 
     <Svg width={size} height={size} viewBox="-34 -22 104 104">
       <G transform="rotate(55 22 30)">
         {power >= 2 ? <Circle cx={22} cy={28} r={16 + power * 0.6} fill={stage.color} opacity={0.018 * power} /> : null}
-        <G transform={`translate(22 36) scale(${flameWidth} ${flameLength}) translate(-22 -36)`}>
+        <AnimatedFlame transform={flameTransform}>
           {power >= 2 ? <Path d={plume} fill={stage.color} stroke={stage.color} strokeWidth={2 + power * 0.5} strokeLinejoin="round" opacity={0.08 + power * 0.012} /> : null}
           <Path d={plume} fill={stage.color} />
           <Path d="M19 37 C17 42 21 45 19 49 C18 53 21 56 22 60 C23 56 26 53 25 49 C23 45 27 42 25 37 Z" fill={stage.core} />
           {power >= 3 ? <Path d="M20.5 37 C19 42 21 46 22 51 C23 46 25 42 23.5 37 Z" fill="#FFFFFF" opacity={0.55 + power * 0.045} /> : null}
-        </G>
+        </AnimatedFlame>
         {Array.from({length:power},(_,index) => {
           const sparks = [[11,42],[13,54],[9,33],[12,65],[7,23],[15,75],[16,16]];
           const [x,y] = sparks[index];
