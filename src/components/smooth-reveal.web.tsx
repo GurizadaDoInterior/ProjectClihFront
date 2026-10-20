@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useReducedMotion } from './use-reduced-motion';
+import { motion, motionTransition } from '../theme/motion';
 
 export function SmoothReveal({ visible, children }: { visible: boolean; children: ReactNode }) {
   const reduced = useReducedMotion();
@@ -16,7 +17,7 @@ export function SmoothReveal({ visible, children }: { visible: boolean; children
     return () => observer.disconnect();
   }, []);
 
-  const duration = visible ? 440 : 400;
+  const duration = visible ? motion.duration.reveal : motion.duration.exit;
   return (
     <div
       aria-hidden={!visible}
@@ -25,7 +26,7 @@ export function SmoothReveal({ visible, children }: { visible: boolean; children
         height: visible ? height : 0,
         overflow: 'hidden',
         opacity: visible ? 1 : 0,
-        transition: reduced ? 'none' : `height ${duration}ms cubic-bezier(.22,1,.36,1), opacity ${duration}ms ease`,
+        transition: reduced ? 'none' : `${motionTransition('height', duration)}, ${motionTransition('opacity', duration)}`,
         pointerEvents: visible ? 'auto' : 'none',
       }}>
       <div ref={content}>{children}</div>

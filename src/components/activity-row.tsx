@@ -1,5 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, Pressable, Text, View } from 'react-native';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { Animated, Easing, Text, View } from 'react-native';
+import { MotionPressable as Pressable } from './motion-pressable';
+import { useReducedMotion } from './use-reduced-motion';
+import { motion } from '../theme/motion';
 import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 import type { DailyActivity } from '@/src/types/today';
 export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: { xpReward?: { amount: number; eventId: number } | null; activity: DailyActivity; onToggle: () => void; disabled?: boolean }) {
@@ -8,15 +11,7 @@ export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: 
   const scale = useRef(new Animated.Value(1)).current;
   const checkProgress = useRef(new Animated.Value(activity.completed ? 1 : 0)).current;
   const wasCompleted = useRef(activity.completed);
-  const [reduceMotion, setReduceMotion] = useState(true);
-  useEffect(() => {
-    let active = true;
-    AccessibilityInfo.isReduceMotionEnabled().then(value => {
-      if (active) setReduceMotion(value);
-    }).catch(() => {});
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    return () => { active = false; subscription.remove(); };
-  }, []);
+  const reduceMotion = useReducedMotion();
   useLayoutEffect(() => {
     const justCompleted = activity.completed && !wasCompleted.current;
     const justUndone = !activity.completed && wasCompleted.current;
@@ -30,14 +25,14 @@ export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: 
       checkProgress.setValue(0);
       Animated.parallel([
         Animated.sequence([
-          Animated.timing(scale, { toValue: 1.32, duration: 180, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-          Animated.timing(scale, { toValue: 1, duration: 300, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
+          Animated.timing(scale, { toValue: motion.scale.confirmation, duration: motion.duration.feedback, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }),
+          Animated.timing(scale, { toValue: 1, duration: motion.duration.release, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }),
         ]),
-        Animated.timing(checkProgress, { toValue: 1, duration: 180, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(checkProgress, { toValue: 1, duration: motion.duration.feedback, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }),
       ]).start();
     } else if (justUndone && !reduceMotion) {
       scale.setValue(0.96);
-      Animated.timing(scale, { toValue: 1, duration: 220, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      Animated.timing(scale, { toValue: 1, duration: motion.duration.release, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }).start();
     }
     return () => { scale.stopAnimation(); checkProgress.stopAnimation(); };
   }, [activity.completed, reduceMotion, scale, checkProgress]);
@@ -47,9 +42,9 @@ export function ActivityRow({ activity, onToggle, disabled = false, xpReward }: 
     rewardMotion.setValue(0);
     if (xpReward && ((xpReward.amount > 0) === activity.completed)) {
       Animated.sequence([
-        Animated.timing(rewardMotion, { toValue: 1, duration: reduceMotion ? 0 : 220, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-        Animated.delay(350),
-        Animated.timing(rewardMotion, { toValue: 2, duration: reduceMotion ? 0 : 450, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(rewardMotion, { toValue: 1, duration: reduceMotion ? 0 : motion.duration.feedback, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }),
+        Animated.delay(motion.duration.rewardHold),
+        Animated.timing(rewardMotion, { toValue: 2, duration: reduceMotion ? 0 : motion.duration.rewardExit, easing: Easing.bezier(...motion.curve), useNativeDriver: true, isInteraction: false }),
       ]).start();
     }
     return () => rewardMotion.stopAnimation();

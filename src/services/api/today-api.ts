@@ -1,18 +1,49 @@
 import { demoToday } from '../../features/today/demo-data';
 import { ApiError, isDemo, request } from './client';
-import type { Area, CreateHabit, TodayResponse, User, Progress } from './contracts';
+import type { Area, CreateHabit, ScheduledHabit, TodayResponse, User, Progress } from './contracts';
 import { mapToday } from './today-mapper';
+import { dateKey, isScheduledOn, parseDateKey, weekDays } from '../../features/agenda/dates';
 let demo = JSON.parse(JSON.stringify(demoToday)) as typeof demoToday;
+const demoSchedules = new Map<string, CreateHabit>();
+let demoSequence = 0;
+const demoCancellations = new Map<string, Set<string>>();
+function demoDay(date: string) {
+  return JSON.parse(JSON.stringify({ ...demo, date, activities: demo.activities.filter(activity => {
+    const id=activity.habitId ?? activity.id;
+    if (demoCancellations.get(id)?.has(`${date}:${activity.completionPeriod ?? activity.period ?? "ANYTIME"}`)) return false;
+    const schedule = demoSchedules.get(id);
+    return !schedule || isScheduledOn({ ...schedule, active: true, startDate: schedule.startDate ?? dateKey() }, date);
+  }).map(activity => date === dateKey() ? activity : { ...activity, completed: false, completionId: null, xpAwarded: 0 }) })) as typeof demoToday;
+}
 export async function getTodaySummary() {
-  if (isDemo) return JSON.parse(JSON.stringify(demo)) as typeof demoToday;
+  if (isDemo) return demoDay(dateKey());
   return mapToday(await request<TodayResponse>('/today'));
+}
+export async function getAgendaDay(date: string) {
+  parseDateKey(date);
+  if (isDemo) return demoDay(date);
+  return mapToday(await request<TodayResponse>(`/today?date=${encodeURIComponent(date)}`));
+}
+export async function getScheduledHabits(): Promise<ScheduledHabit[]> {
+  if (!isDemo) return request<ScheduledHabit[]>('/habits');
+  const ids = [...new Set(demo.activities.map(activity => activity.habitId ?? activity.id))];
+  return ids.map(id => {
+    const items = demo.activities.filter(activity => (activity.habitId ?? activity.id) === id);
+    const activity = items[0];
+    return { id, areaId: 'demo-study', name: activity.title, measurementType: 'COUNT', targetValue: 1,
+      dayPeriod: activity.period ?? 'ANYTIME', scheduledDays: [...weekDays], startDate: '1970-01-01',
+      ...demoSchedules.get(id), active: true, canceledOccurrences: [...(demoCancellations.get(id) ?? [])],
+      dayPeriods: items.map(item => item.completionPeriod ?? item.period ?? 'ANYTIME'),
+    };
+  });
 }
 export async function completeHabit(habitId: string, dayPeriod?: import('./contracts').DayPeriod) {
   if (isDemo) {
     demo = {
       ...demo,
       activities: demo.activities.map((item) =>
-        item.id === habitId ? { ...item, completed: true } : item,
+        (item.habitId ?? item.id) === habitId && (!dayPeriod || item.completionPeriod === dayPeriod)
+          ? { ...item, completed: true, completionId: `demo-completion:${item.id}`, xpAwarded: 10 } : item,
       ),
     };
     return;
@@ -41,7 +72,8 @@ export async function completeHabit(habitId: string, dayPeriod?: import('./contr
 export async function undoHabit(habitId: string, completionId?: string | null) {
   if (isDemo) {
     demo = { ...demo, activities: demo.activities.map((item) =>
-      item.id === habitId ? { ...item, completed: false } : item) };
+      (item.habitId ?? item.id) === habitId && (!completionId || completionId === `demo-completion:${item.id}`)
+        ? { ...item, completed: false, completionId: null } : item) };
     return;
   }
   if (!completionId) throw new Error('Não foi possível identificar a conclusão. Atualize a rotina e tente novamente.');
@@ -74,13 +106,15 @@ export const createArea = (name: string) =>
   });
 export async function createHabit(values: CreateHabit) {
   if (isDemo) {
-    demo.activities.push({
-      id: `demo-${Date.now()}`,
+    const id = `demo-${Date.now()}-${++demoSequence}`;
+    demoSchedules.set(id, { ...values, startDate: values.startDate ?? dateKey() });
+    for (const period of values.dayPeriods ?? [values.dayPeriod]) demo.activities.push({
+      id: `${id}:${period}`, habitId: id, completionPeriod: period,
       title: values.name,
-      target: `${values.targetValue} ${values.unit ?? ''}`,
+      target: values.measurementType === 'BOOLEAN' ? 'Concluir uma vez' : `${values.targetValue} ${values.unit ?? ''}`.trim(),
       area: 'study',
-      period: values.dayPeriod,
-      periods: values.dayPeriods ?? [values.dayPeriod],
+      period,
+      periods: [period],
       completed: false,
     });
     return;
@@ -104,7 +138,7 @@ export async function resolveHabitArea(selectedId: string, newName: string, avai
 }
 
 export async function deleteHabit(habitId: string, dayPeriod?: import('./contracts').DayPeriod) {
-  if (isDemo) { demo = { ...demo, activities: demo.activities.filter(item => item.id !== habitId) }; return; }
+  if (isDemo) { demo = { ...demo, activities: demo.activities.filter(item => (item.habitId ?? item.id) !== habitId || (!!dayPeriod && item.completionPeriod !== dayPeriod)) }; return; }
   await request(`/habits/${encodeURIComponent(habitId)}${dayPeriod ? `?dayPeriod=${encodeURIComponent(dayPeriod)}` : ''}`, { method: 'DELETE' });
 }
 export async function deleteArea(areaId: string) {
@@ -115,4 +149,14 @@ export type LinkedAreaHabit = {id:string; areaId:string; name:string; active:boo
 export async function getAreaHabits(areaId:string) {
   const habits=await request<LinkedAreaHabit[]>('/habits');
   return habits.filter(habit=>habit.active && habit.areaId===areaId);
+}
+
+export async function setAgendaOccurrenceCanceled(habitId: string, date: string, period: import('./contracts').DayPeriod, canceled: boolean) {
+  parseDateKey(date);
+  if (isDemo) {
+    const entries=demoCancellations.get(habitId) ?? new Set<string>();
+    if(canceled) entries.add(`${date}:${period}`); else entries.delete(`${date}:${period}`);
+    demoCancellations.set(habitId,entries); return;
+  }
+  return request(`/habits/${encodeURIComponent(habitId)}/cancellations/${date}/${period}`, {method:canceled ? 'PUT' : 'DELETE'});
 }

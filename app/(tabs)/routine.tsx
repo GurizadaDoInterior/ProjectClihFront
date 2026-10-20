@@ -14,11 +14,13 @@ import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider
 import { useTodaySummary } from '@/src/features/today/use-today-summary';
 import { SwipeToDelete } from '@/src/components/swipe-to-delete';
 import { ActivityRow } from '@/src/components/activity-row';
+import { RoutineAgenda } from '@/src/components/routine-agenda';
+import { dateKey } from '@/src/features/agenda/dates';
 
 export default function RoutineScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const { data, error, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
+  const { data, error, refetch, toggleActivity, completionError, isToggling, isActivityPending, xpReward } = useTodaySummary();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<DailyActivity | null>(null);
   const deletion = useMutation({
@@ -30,7 +32,7 @@ export default function RoutineScreen() {
     onSuccess: (deletedId) => {
       queryClient.setQueryData<TodaySummary>(['today'], current => current ? { ...current, activities: current.activities.filter(activity => activity.id !== deletedId) } : current);
       setDeleting(null);
-      for (const key of ['today', 'day-history', 'calendar-activities']) void queryClient.invalidateQueries({ queryKey: [key] });
+      for (const key of ['today', 'day-history', 'calendar-activities', 'agenda']) void queryClient.invalidateQueries({ queryKey: [key] });
     },
   });
   const groups = [
@@ -53,6 +55,8 @@ export default function RoutineScreen() {
         </Link>
       </View>
 
+      <RoutineAgenda today={data?.date ?? dateKey()} />
+      <SectionHeader>ATIVIDADES DE HOJE</SectionHeader>
       {!data ? (
         <Pressable onPress={() => refetch()}>
           <Text style={{ color: colors.muted }}>
@@ -76,7 +80,7 @@ export default function RoutineScreen() {
             .filter((item) => (item.periods ?? [item.period ?? 'ANYTIME']).some(period => period === key))
             .map((item) => (
               <View key={item.id}>
-              <SwipeToDelete onFullSwipe={animateRemoval => deletion.mutateAsync({activity:item,animateRemoval})} disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isToggling || deletion.isPending} onToggle={() => toggleActivity(item.id)} />
+              <SwipeToDelete onFullSwipe={animateRemoval => deletion.mutateAsync({activity:item,animateRemoval})} disabled={isToggling || deletion.isPending} onDelete={() => { deletion.reset(); setDeleting(item); }}><ActivityRow activity={item} xpReward={xpReward?.habitId === item.id ? xpReward : null} disabled={isActivityPending(item.id) || deletion.isPending} onToggle={() => toggleActivity(item.id)} />
               <Pressable accessibilityRole="button" accessibilityLabel={'Excluir atividade '+item.title} disabled={isToggling || deletion.isPending} onPress={() => { deletion.reset(); setDeleting(item); }} style={({pressed}) => ({alignSelf:'flex-end',paddingVertical:10,paddingLeft:18,opacity:pressed?0.7:1})}><Text style={{color:colors.danger,fontSize:12,fontWeight:'600'}}>Excluir atividade</Text></Pressable>
               </SwipeToDelete></View>
             ))}

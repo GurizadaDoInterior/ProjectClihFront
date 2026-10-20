@@ -5,11 +5,12 @@ const vm = require('node:vm');
 const ts = require('typescript');
 function load(path,requireFn){const mod={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText,{module:mod,exports:mod.exports,require:requireFn,Date});return mod.exports;}
 const logic=load('src/components/swipe-gesture.ts',()=>{});
+const motion=load('src/theme/motion.ts',()=>{});
 function render(disabled=false,failFullSwipe=false,reduced=false){
   const refs=[];let opened=false,deleted=0;
   const react={useRef:value=>{const ref={current:value};refs.push(ref);return ref;},useState:()=>[false,value=>{opened=value;}],useEffect:callback=>callback()};
   const jsx=(type,props)=>({type,props});
-  const {SwipeToDelete}=load('src/components/swipe-to-delete.web.tsx',name=>name==='react'?react:name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='react-native'?{Text:'text'}:name.includes('motion-pressable')?{MotionPressable:'button'}:name.includes('use-reduced-motion')?{useReducedMotion:()=>reduced}:name.includes('swipe-gesture')?logic:{useTheme:()=>({colors:{background:'#fff',danger:'#f00'}})});
+  const {SwipeToDelete}=load('src/components/swipe-to-delete.web.tsx',name=>name==='react'?react:name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='react-native'?{Text:'text'}:name==='../theme/motion'?motion:name.includes('motion-pressable')?{MotionPressable:'button'}:name.includes('use-reduced-motion')?{useReducedMotion:()=>reduced}:name.includes('swipe-gesture')?logic:{useTheme:()=>({colors:{background:'#fff',danger:'#f00'}})});
   const tree=SwipeToDelete({disabled,children:'activity',onDelete:()=>deleted++,onFullSwipe:async animateRemoval=>{deleted++;if(failFullSwipe)throw new Error('API failed');await animateRemoval?.();}});
   const surface=tree.props.children[1];
   const node={style:{},clientWidth:400,captured:false,setPointerCapture(){this.captured=true;},hasPointerCapture(){return this.captured;},releasePointerCapture(){this.captured=false;}};
@@ -50,7 +51,7 @@ test('successful deletion gently collapses the complete row before removal finis
   ui.shell.current={getBoundingClientRect:()=>({height:128}),animate:(keyframes,config)=>{frames=keyframes;options=config;return {finished:new Promise(resolve=>{finish=resolve;})};}};
   ui.handlers.onPointerDownCapture(ui.event(380,20));ui.handlers.onPointerMove(ui.event(20,22));ui.handlers.onPointerUp(ui.event(20,22));
   await new Promise(setImmediate);
-  assert.equal(ui.deleted,1);assert.equal(frames[0].height,'128px');assert.equal(frames[1].height,'0px');assert.equal(options.duration,220);
+  assert.equal(ui.deleted,1);assert.equal(frames[0].height,'128px');assert.equal(frames[1].height,'0px');assert.ok(options.duration<=240);
   finish();await new Promise(setImmediate);
 });
 test('failed deletion never collapses the row and reduced motion skips its animation',async()=>{

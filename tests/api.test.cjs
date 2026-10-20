@@ -25,6 +25,20 @@ const {
   getTodaySummary,
 } = require('../src/services/api/today-api.ts');
 const originalFetch = global.fetch;
+
+test('calendar scheduling sends start and end dates and queries the selected future day',async()=>{
+ const {getAgendaDay,getScheduledHabits}=require('../src/services/api/today-api.ts');
+ const calls=[];
+ global.fetch=async(url,init)=>{
+  calls.push({url,body:init?.body?JSON.parse(init.body):undefined});
+  return Response.json(url.includes('/today?')?today:[]);
+ };
+ await createHabit({areaId:'a',name:'Tarefa agendada',measurementType:'BOOLEAN',targetValue:1,
+  dayPeriod:'MORNING',scheduledDays:['THURSDAY'],startDate:'2026-11-05',endDate:'2026-11-05'});
+ assert.equal(calls[0].body.startDate,'2026-11-05');assert.equal(calls[0].body.endDate,'2026-11-05');
+ await getAgendaDay('2026-11-05');assert.match(calls[1].url,/\/today\?date=2026-11-05$/);
+ await getScheduledHabits();assert.match(calls[2].url,/\/habits$/);
+});
 afterEach(() => {
   global.fetch = originalFetch;
   setAccessTokenProvider();

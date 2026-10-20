@@ -26,7 +26,7 @@ export default function TodayScreen() {
   const heroWidth = Math.min(640, Math.min(screenWidth, 920) - 48);
   const copyWidth = (heroWidth - 12) * 1.15 / 2.15;
   const metricSize = screenWidth < 480 ? 32 : 38;
-  const { data, isLoading, isError, refetch, toggleActivity, completionError, isToggling, xpReward } = useTodaySummary();
+  const { data, isLoading, isError, refetch, toggleActivity, completionError, isActivityPending, xpReward } = useTodaySummary();
   if (isLoading) return <AppScreen><Text style={styles.sub}>Carregando sua rotina...</Text></AppScreen>;
   if (isError || !data) return <AppScreen>
     <Text style={styles.title}>VAMOS TENTAR DE NOVO.</Text>
@@ -79,7 +79,7 @@ export default function TodayScreen() {
     {completionError ? <Text accessibilityRole="alert" style={styles.error}>{completionError.message}</Text> : null}
 
     {!total ? <Link href="/habit/new" style={styles.textLink}>Adicionar sua primeira atividade →</Link> : null}
-    {data.activities.map(activity => <ActivityRow key={activity.id} activity={activity} xpReward={xpReward?.habitId === activity.id ? xpReward : null} disabled={isToggling} onToggle={() => toggle(activity.id)} />)}
+    {data.activities.map(activity => <ActivityRow key={activity.id} activity={activity} xpReward={xpReward?.habitId === activity.id ? xpReward : null} disabled={isActivityPending(activity.id)} onToggle={() => toggle(activity.id)} />)}
 
     <Link href="/sleep" asChild><Pressable accessibilityRole="button" style={styles.sleep}>
       <View><Text style={styles.eyebrow}>RECUPERAÇÃO</Text><Text style={styles.sleepTitle}>O descanso também conta.</Text><Text style={styles.sub}>Registrar horários de sono</Text></View>

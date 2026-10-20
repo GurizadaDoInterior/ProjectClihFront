@@ -1,4 +1,5 @@
 import { useReducedMotion } from './use-reduced-motion';
+import { motion } from '../theme/motion';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
@@ -24,12 +25,12 @@ export function SleepHistory({ month, selected, entries, onMonth, onSelect, over
   if(Platform.OS === 'web'){
     const element=monthView.current as unknown as HTMLElement | null;
     if(typeof element?.animate !== 'function')return;
-    const animation=element.animate([{opacity:0.94,transform:`translateX(${direction*3}px)`},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'cubic-bezier(.16,1,.3,1)'});
+    const animation=element.animate([{opacity:0.94,transform:`translateX(${direction*3}px)`},{opacity:1,transform:'translateX(0)'}],{duration:motion.duration.transition,easing:motion.easing});
     return ()=>animation.cancel();
   }
   monthFade.stopAnimation();
   monthFade.setValue(0.9);
-  const animation = Animated.timing(monthFade, {toValue:1,duration:220,easing:Easing.out(Easing.cubic),useNativeDriver:true});
+  const animation = Animated.timing(monthFade, {toValue:1,duration:motion.duration.transition,easing:Easing.bezier(...motion.curve),useNativeDriver:true,isInteraction:false});
   animation.start();
   return () => animation.stop();
  },[monthKey,monthFade,reduced]);

@@ -1,7 +1,7 @@
 import {AppText as Text} from '@/src/components/app-text';
 import { MotionPressable as Pressable } from '@/src/components/motion-pressable';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { Modal, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { z } from 'zod';
@@ -12,6 +12,9 @@ import { isDemo } from '@/src/services/api/client';
 import type { DayPeriod, MeasurementType } from '@/src/services/api/contracts';
 
 import { AppScreen } from '@/src/components/app-screen';
+import { TaskCalendar } from '@/src/components/task-calendar';
+import { dateKey, formatDate, initialScheduleDate, parseDateKey, scheduleFor, type Recurrence } from '@/src/features/agenda/dates';
+import type { TodaySummary } from '@/src/types/today';
 import { radius } from '@/src/theme/tokens';
 import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
 
@@ -43,19 +46,22 @@ const measurements: { label: string; value: MeasurementType; unit: string }[] = 
   { label: 'Reais', value: 'MONEY', unit: 'reais' },
   { label: 'Concluir', value: 'BOOLEAN', unit: '' },
 ];
-const weekDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-const dayLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const dayLabels: Record<string, string> = { MONDAY: 'Seg', TUESDAY: 'Ter', WEDNESDAY: 'Qua', THURSDAY: 'Qui', FRIDAY: 'Sex', SATURDAY: 'Sáb', SUNDAY: 'Dom' };
 
 export default function NewHabitScreen() {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const params = useLocalSearchParams<{ date?: string }>();
+  const today = queryClient.getQueryData<TodaySummary>(['today'])?.date ?? dateKey();
   const areas = useQuery({ queryKey: ['areas'], queryFn: getAreas });
   const [areaId, setAreaId] = useState('');
   const [newArea, setNewArea] = useState('');
   const [measurement, setMeasurement] = useState(measurements[0]);
-  const [days, setDays] = useState(weekDays);
+  const [scheduledDate, setScheduledDate] = useState(() => initialScheduleDate(params.date, today));
+  const [calendarMonth, setCalendarMonth] = useState(() => parseDateKey(initialScheduleDate(params.date, today)));
+  const [recurrence, setRecurrence] = useState<Recurrence>('once');
 
   const [submitError, setSubmitError] = useState('');
   const [creatingArea, setCreatingArea] = useState(false);
@@ -75,7 +81,7 @@ export default function NewHabitScreen() {
     mutationFn:({id,period}:{id:string;period:DayPeriod})=>deleteHabit(id,period),
     onSuccess:async()=>{
       areaDeletion.reset(); await linkedHabits.refetch();
-      for(const key of ['today','day-history','calendar-activities']) void queryClient.invalidateQueries({queryKey:[key]});
+      for(const key of ['today','day-history','calendar-activities','agenda']) void queryClient.invalidateQueries({queryKey:[key]});
     },
   });
   const areaBusy=areaDeletion.isPending || linkedDeletion.isPending;
@@ -99,8 +105,8 @@ export default function NewHabitScreen() {
   async function submit(values: HabitForm) {
     setSubmitError('');
     if (!values.dayPeriods.length) { setSubmitError('Selecione ao menos um turno.'); return; }
-    if (!days.length) {
-      setSubmitError('Selecione ao menos um dia da semana.');
+    if (scheduledDate < today) {
+      setSubmitError('Escolha hoje ou uma data futura.');
       return;
     }
     try {
@@ -116,12 +122,13 @@ export default function NewHabitScreen() {
         unit: measurement.unit,
         dayPeriod: values.dayPeriods[0],
         dayPeriods: values.dayPeriods,
-        scheduledDays: days,
+        ...scheduleFor(scheduledDate, recurrence),
       });
       await queryClient.cancelQueries({ queryKey: ['today'] });
       queryClient.setQueryData(['today'], await getTodaySummary());
       void queryClient.invalidateQueries({ queryKey: ['calendar-activities'] });
       void queryClient.invalidateQueries({ queryKey: ['day-history'] });
+      void queryClient.invalidateQueries({ queryKey: ['agenda'] });
       if (router.canGoBack()) router.back(); else router.replace('/routine');
     } catch (error) {
       setSubmitError(
@@ -241,25 +248,17 @@ export default function NewHabitScreen() {
           </Pressable>
         ))}
       </View>
-      <Text style={styles.label}>Dias da semana</Text>
-      <Text style={styles.scheduleHint}>Repete toda semana nos dias escolhidos, até você excluir a atividade.</Text>
+      <Text style={styles.label}>Quando?</Text>
+      <Text style={styles.scheduleHint}>Escolha a data da atividade. Você também pode agendar para os próximos meses.</Text>
+      <TaskCalendar month={calendarMonth} selected={scheduledDate} minDate={today} onMonth={setCalendarMonth} onSelect={setScheduledDate} />
+      <Text style={styles.label}>Repetir</Text>
       <View style={styles.periods}>
-        {weekDays.map((day, index) => (
-          <Pressable
-            key={day}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: days.includes(day) }}
-            onPress={() =>
-              setDays((current) =>
-                current.includes(day) ? current.filter((item) => item !== day) : [...current, day],
-              )
-            }
-            style={[styles.period, days.includes(day) && styles.periodSelected]}
-          >
-            <Text style={styles.periodText}>{dayLabels[index]}</Text>
-          </Pressable>
-        ))}
+        {([{ value: 'once', label: 'Não repetir' }, { value: 'daily', label: 'Todos os dias' }, { value: 'weekly', label: 'Toda semana' }] as const).map(option =>
+          <Pressable key={option.value} accessibilityRole="radio" accessibilityState={{ checked: recurrence === option.value }} onPress={() => setRecurrence(option.value)} style={[styles.period, recurrence === option.value && styles.periodSelected]}>
+            <Text style={[styles.periodText, recurrence === option.value && styles.periodTextSelected]}>{option.label}</Text>
+          </Pressable>)}
       </View>
+      <Text accessibilityLiveRegion="polite" style={styles.scheduleHint}>{recurrence === 'once' ? `Somente em ${formatDate(scheduledDate)}.` : `${recurrence === 'daily' ? 'Todos os dias' : 'Toda semana'}, a partir de ${formatDate(scheduledDate)}.`}</Text>
       <Text style={styles.label}>Período</Text>
       <Text style={styles.intro}>Escolha um ou mais turnos. Cada turno tem sua própria conclusão.</Text>
       <View style={styles.periods}>
@@ -297,7 +296,7 @@ export default function NewHabitScreen() {
               <ScrollView style={{maxHeight:220}}>
                 {linkedHabits.data.map(habit => <View key={habit.id} style={{paddingVertical:12,borderBottomWidth:1,borderColor:colors.border,gap:5}}>
                   <Text style={{color:colors.ink,fontWeight:'600'}}>{habit.name}</Text>
-                  <Text style={{color:colors.muted,fontSize:12}}>{habit.scheduledDays.map(day=>dayLabels[weekDays.indexOf(day)] ?? day).join(', ')} · {(habit.dayPeriods ?? [habit.dayPeriod]).map(period=>periods.find(label=>periodValues[label]===period)).join(' e ')}</Text>
+                  <Text style={{color:colors.muted,fontSize:12}}>{habit.scheduledDays.map(day=>dayLabels[day] ?? day).join(', ')} · {(habit.dayPeriods ?? [habit.dayPeriod]).map(period=>periods.find(label=>periodValues[label]===period)).join(' e ')}</Text>
                   {(habit.dayPeriods ?? [habit.dayPeriod]).map(period=><Pressable key={period} disabled={areaBusy} onPress={() => linkedDeletion.mutate({id:habit.id,period})} style={{paddingVertical:10,alignSelf:'flex-start'}} accessibilityLabel={'Excluir '+habit.name+' do turno '+(periods.find(label=>periodValues[label]===period) ?? period)}><Text style={{color:colors.danger,fontWeight:'600'}}>{linkedDeletion.isPending && linkedDeletion.variables?.id===habit.id && linkedDeletion.variables?.period===period ? 'Excluindo...' : 'Excluir: '+(periods.find(label=>periodValues[label]===period) ?? period)}</Text></Pressable>)}
                 </View>)}
               </ScrollView>

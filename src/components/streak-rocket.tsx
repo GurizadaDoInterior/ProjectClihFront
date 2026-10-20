@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, View } from 'react-native';
+import { Animated, Easing, Platform, View } from 'react-native';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import { getFlameStage } from '@/src/features/streak/flame';
 import { useReducedMotion } from './use-reduced-motion';
@@ -11,7 +11,7 @@ export function StreakRocket({ days, size = 84, animate = false }: { days: numbe
   const reducedMotion = useReducedMotion();
   useEffect(() => {
     pulse.setValue(0);
-    if (!animate || reducedMotion) return;
+    if (Platform.OS === 'web' || !animate || reducedMotion) return;
     const flameAnimation = Animated.loop(Animated.sequence([
       Animated.timing(pulse, { toValue: 1, duration: 380, easing: Easing.inOut(Easing.sin), useNativeDriver: false, isInteraction: false }),
       Animated.timing(pulse, { toValue: 0, duration: 460, easing: Easing.inOut(Easing.sin), useNativeDriver: false, isInteraction: false }),
@@ -39,10 +39,12 @@ export function StreakRocket({ days, size = 84, animate = false }: { days: numbe
       <G transform="rotate(55 22 30)">
         {power >= 2 ? <Circle cx={22} cy={28} r={16 + power * 0.6} fill={stage.color} opacity={0.018 * power} /> : null}
         <AnimatedFlame transform={flameTransform}>
+          <G style={Platform.OS === 'web' ? {animation:animate && !reducedMotion ? 'clih-flame 840ms ease-in-out infinite' : 'none'} as never : undefined}>
           {power >= 2 ? <Path d={plume} fill={stage.color} stroke={stage.color} strokeWidth={2 + power * 0.5} strokeLinejoin="round" opacity={0.08 + power * 0.012} /> : null}
           <Path d={plume} fill={stage.color} />
           <Path d="M19 37 C17 42 21 45 19 49 C18 53 21 56 22 60 C23 56 26 53 25 49 C23 45 27 42 25 37 Z" fill={stage.core} />
           {power >= 3 ? <Path d="M20.5 37 C19 42 21 46 22 51 C23 46 25 42 23.5 37 Z" fill="#FFFFFF" opacity={0.55 + power * 0.045} /> : null}
+          </G>
         </AnimatedFlame>
         {Array.from({length:power},(_,index) => {
           const sparks = [[11,42],[13,54],[9,33],[12,65],[7,23],[15,75],[16,16]];

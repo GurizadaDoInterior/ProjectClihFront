@@ -66,4 +66,14 @@ export type CreateHabit = {
   dayPeriod: DayPeriod;
   dayPeriods?: DayPeriod[];
   scheduledDays: string[];
+  startDate?: string;
+  endDate?: string;
+};
+
+export type ScheduledHabit = CreateHabit & {
+  canceledOccurrences?: string[];
+  id: string;
+  active: boolean;
+  startDate: string;
+  endDate?: string;
 };

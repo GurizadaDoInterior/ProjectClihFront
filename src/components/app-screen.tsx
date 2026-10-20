@@ -1,7 +1,9 @@
-import { PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
+import { PropsWithChildren, useCallback, useRef } from 'react';
 import { useFocusEffect, type Href } from 'expo-router';
 import { BackButton } from './back-button';
-import { AccessibilityInfo, Animated, Easing, Platform, ScrollView, View, Text } from 'react-native';
+import { Animated, Easing, Platform, ScrollView, View, Text } from 'react-native';
+import { useReducedMotion } from './use-reduced-motion';
+import { motion } from '../theme/motion';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeToggle } from './theme-toggle';
 import { useTheme, themedStyles, type Palette } from '@/src/theme/theme-provider';
@@ -11,24 +13,18 @@ export function AppScreen({ children, scroll = true, testID, backTo }: AppScreen
   const styles = getStyles(colors);
   const screen = useRef<View>(null);
   const reveal = useRef(new Animated.Value(1)).current;
-  const [reduceMotion, setReduceMotion] = useState(true);
-  useEffect(() => {
-    let active=true;
-    AccessibilityInfo.isReduceMotionEnabled().then(value=>{if(active)setReduceMotion(value);}).catch(()=>{});
-    const listener=AccessibilityInfo.addEventListener('reduceMotionChanged',setReduceMotion);
-    return ()=>{active=false;listener.remove();};
-  },[]);
+  const reduceMotion = useReducedMotion();
   useFocusEffect(useCallback(()=>{
     if(Platform.OS === 'web') {
       const element=screen.current as unknown as HTMLElement | null;
       if(reduceMotion || typeof element?.animate !== 'function')return;
-      const animation=element.animate([{opacity:0.9},{opacity:1}],{duration:220,easing:'cubic-bezier(.16,1,.3,1)'});
+      const animation=element.animate([{opacity:0.94},{opacity:1}],{duration:motion.duration.transition,easing:motion.easing});
       return ()=>animation.cancel();
     }
     reveal.stopAnimation();
     if(reduceMotion){reveal.setValue(1);return;}
     reveal.setValue(0);
-    const animation=Animated.timing(reveal,{toValue:1,duration:180,easing:Easing.out(Easing.cubic),useNativeDriver:true});
+    const animation=Animated.timing(reveal,{toValue:1,duration:motion.duration.transition,easing:Easing.bezier(...motion.curve),useNativeDriver:true,isInteraction:false});
     animation.start();
     return ()=>animation.stop();
   },[reduceMotion,reveal]));

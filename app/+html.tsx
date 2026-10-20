@@ -31,4 +31,12 @@ export default function Root({ children }: { children: ReactNode }) {
 const responsiveBackground = `
 body {
   background-color: #F6F8FC;
-}`;
+}
+@keyframes clih-drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(6px,-4px); } }
+@keyframes clih-trail { 0% { opacity: 0; transform: translate(8px,-5px) rotate(-35deg); } 20% { opacity: .35; } 100% { opacity: 0; transform: translate(-40px,25px) rotate(-35deg); } }
+@keyframes clih-twinkle { 0%,100% { opacity: .2; } 50% { opacity: .85; } }
+@keyframes clih-flame { 0%,100% { opacity: .85; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .clih-ambient { animation: none !important; }
+}
+`;
